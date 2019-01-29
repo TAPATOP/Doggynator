@@ -7,5 +7,5 @@ import (
 
 func main() {
 	game := source.DoggynatorConstructor("questions.txt")
-	fmt.Println(game.Records[0].ToString())
+	fmt.Println(game.QuestionsToString())
 }

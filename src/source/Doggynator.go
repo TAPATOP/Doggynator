@@ -7,8 +7,8 @@ import (
 )
 
 type Doggynator struct {
-	Questions []string
-	Records   []Record
+	questions []string
+	records   []Record
 }
 
 func DoggynatorConstructor(questionsURL string) *Doggynator {
@@ -29,7 +29,10 @@ func DoggynatorConstructor(questionsURL string) *Doggynator {
 		{positive: 1, negative: 220, irrelevant: 0},
 		{positive: 1, negative: 220, irrelevant: 0},
 	})
-	newObj.Records = []Record{*rec0, *rec1, *rec2}
+	newObj.records = []Record{*rec0, *rec1, *rec2}
+	newObj.questions = append(newObj.questions, "Is it brown")
+	newObj.saveQuestions("questions.txt")
+
 	//newObj.saveRecords("records.txt")
 	return newObj
 }
@@ -37,18 +40,40 @@ func DoggynatorConstructor(questionsURL string) *Doggynator {
 func (obj *Doggynator) loadQuestions(questionsURL string) {
 	data, err := ioutil.ReadFile(questionsURL)
 	if err != nil {
-		fmt.Println("File reading error", err)
+		fmt.Println("Questions reading error", err)
 		return
 	}
-	obj.Questions = strings.Split(string(data), "\n")
+	obj.questions = filter(strings.Split(string(data), "\n"))
+}
+
+// TODO: Could be faster?
+func filter(input []string) (output []string) {
+	for _, elem := range input {
+		if elem != "" {
+			output = append(output, elem)
+		}
+	}
+	return output
+}
+
+func (obj *Doggynator) saveQuestions(questionsURL string) {
+	err := ioutil.WriteFile(questionsURL, []byte(obj.QuestionsToString()), 0644)
+	if err != nil {
+		fmt.Println("Questions saving error", err)
+		return
+	}
 }
 
 func (obj *Doggynator) loadRecords(recordsURL string) {
 }
 
 func (obj *Doggynator) saveRecords(recordsURL string) {
+
 }
 
-func (obj *Doggynator) ToString() []string {
-	return obj.Questions
+func (obj *Doggynator) QuestionsToString() (stringified string) {
+	for _, elem := range obj.questions {
+		stringified += elem + "\n"
+	}
+	return stringified
 }
