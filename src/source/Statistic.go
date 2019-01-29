@@ -1,17 +1,37 @@
 package source
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
+
+const StatisticSize = 3
 
 type Statistic struct {
-	positive   int
-	negative   int
-	irrelevant int
+	data [StatisticSize]int
 }
 
-//func StatisticConstructor(positive, negative, irrelevant int) *Statistic {
-//	return &Statistic{positive:positive, negative:negative, irrelevant:irrelevant}
-//}
+func StatisticConstructor(input [StatisticSize]int) *Statistic {
+	return &Statistic{data: input}
+}
 
-func (stat *Statistic) ToString() string {
-	return string(strconv.Itoa(stat.positive) + " " + strconv.Itoa(stat.negative) + " " + strconv.Itoa(stat.irrelevant))
+func RawStatisticConstructor(rawData string) (*Statistic, error) {
+	splitString := strings.Split(rawData, " ")
+	readyData := [StatisticSize]int{}
+	for index, elem := range splitString {
+		newNumber, err := strconv.Atoi(elem)
+		if err != nil {
+			return nil, err
+		}
+		readyData[index] = newNumber
+	}
+	returnObj := StatisticConstructor(readyData)
+	return returnObj, nil
+}
+
+func (stat *Statistic) ToString() (output string) {
+	for _, elem := range stat.data {
+		output += strconv.Itoa(elem) + " "
+	}
+	return
 }

@@ -6,10 +6,6 @@ type Record struct {
 }
 
 func RecordConstructor(name string, stats []Statistic) *Record {
-	//newObj := new(Record)
-	//newObj.name = name
-	//copy(newObj.statistics, stats)
-
 	return &Record{name: name, statistics: stats}
 }
 
