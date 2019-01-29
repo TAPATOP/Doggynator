@@ -30,7 +30,7 @@ func DoggynatorConstructor(questionsURL string) *Doggynator {
 		{positive: 1, negative: 220, irrelevant: 0},
 	})
 	newObj.records = []Record{*rec0, *rec1, *rec2}
-	newObj.questions = append(newObj.questions, "Is it brown")
+	newObj.addQuestion("Is it brown")
 	newObj.saveQuestions("questions.txt")
 
 	//newObj.saveRecords("records.txt")
@@ -61,6 +61,12 @@ func (obj *Doggynator) saveQuestions(questionsURL string) {
 	if err != nil {
 		fmt.Println("Questions saving error", err)
 		return
+	}
+}
+
+func (obj *Doggynator) addQuestion(question string) {
+	if question != "" && question != "\n" && question != "\t" && question != " " {
+		obj.questions = append(obj.questions, question)
 	}
 }
 
