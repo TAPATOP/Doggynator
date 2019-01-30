@@ -14,5 +14,5 @@ func (rec *Record) ToString() string {
 	for _, elem := range rec.statistics {
 		stringifiedStats = stringifiedStats + elem.ToString() + "\n"
 	}
-	return string(rec.name + " " + stringifiedStats)
+	return string(rec.name + stringifiedStats)
 }

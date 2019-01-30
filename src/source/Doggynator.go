@@ -33,7 +33,7 @@ func DoggynatorConstructor(questionsURL, recordsURL string) *Doggynator {
 	//newObj.records = []Record{*rec0, *rec1, *rec2}
 	newObj.saveQuestions("questions.txt")
 
-	//newObj.saveRecords("records.txt")
+	newObj.saveRecords("records.txt")
 	return newObj
 }
 
@@ -78,7 +78,6 @@ func (obj *Doggynator) loadRecords(recordsURL string) {
 	}
 	rawRecords := filter(strings.Split(string(data), "\n"))
 	obj.records = processRawRecords(rawRecords, len(obj.questions))
-	fmt.Println("Didn't die")
 }
 
 func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Record) {
@@ -106,7 +105,14 @@ func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Re
 }
 
 func (obj *Doggynator) saveRecords(recordsURL string) {
-
+	var stringified string
+	for _, elem := range obj.records {
+		stringified += elem.ToString()
+	}
+	err := ioutil.WriteFile(recordsURL, []byte(stringified), 0644)
+	if err != nil {
+		fmt.Println("There was an issue with saving the records to a file")
+	}
 }
 
 func (obj *Doggynator) QuestionsToString() (stringified string) {
