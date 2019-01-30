@@ -29,6 +29,10 @@ func RawStatisticConstructor(rawData string) (*Statistic, error) {
 	return returnObj, nil
 }
 
+func NullStatisticConstructor() *Statistic {
+	return StatisticConstructor([StatisticSize]int{0, 0, 0})
+}
+
 func (stat *Statistic) ToString() (output string) {
 	for _, elem := range stat.data {
 		output += strconv.Itoa(elem) + " "

@@ -16,23 +16,7 @@ func DoggynatorConstructor(questionsURL, recordsURL string) *Doggynator {
 	newObj.loadQuestions(questionsURL)
 	newObj.loadRecords(recordsURL)
 
-	//stat1 := Statistic{[...]int{1, 22, 0}}
-	//stat2 := Statistic{[...]int{1, 20, 0}}
-	//rec0 := RecordConstructor("rec0", []Statistic{
-	//	stat1,
-	//	stat2,
-	//})
-	//rec1 := RecordConstructor("rec1", []Statistic{
-	//	{[...]int{1, 22, 0}},
-	//	{[...]int{1, 22, 0}},
-	//})
-	//rec2 := RecordConstructor("rec2", []Statistic{
-	//	{[...]int{1, 220, 0}},
-	//	{[...]int{1, 220, 0}},
-	//})
-	//newObj.records = []Record{*rec0, *rec1, *rec2}
 	newObj.saveQuestions("questions.txt")
-
 	newObj.saveRecords("records.txt")
 	return newObj
 }
@@ -67,6 +51,9 @@ func (obj *Doggynator) saveQuestions(questionsURL string) {
 func (obj *Doggynator) addQuestion(question string) {
 	if question != "" && question != "\n" && question != "\t" && question != " " {
 		obj.questions = append(obj.questions, question)
+		for i := 0; i < len(obj.records); i++ {
+			obj.records[i].AddField()
+		}
 	}
 }
 
