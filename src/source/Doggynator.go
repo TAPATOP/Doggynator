@@ -2,7 +2,6 @@ package source
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -18,25 +17,25 @@ type Doggynator struct {
 	output    *bufio.Writer
 }
 
-func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) *Doggynator {
+func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	err := newObj.loadQuestions(questionsURL)
 	if err != nil {
-		fmt.Println("Error loading questions!")
-		return nil
+		newObj.writeln("Error loading questions!")
+		return nil, err
 	}
 
-	newObj.loadRecords(recordsURL)
+	err = newObj.loadRecords(recordsURL)
 	if err != nil {
-		fmt.Println("Error loading records!")
-		return nil
+		newObj.writeln("Error loading records!")
+		return nil, err
 	}
 
 	newObj.output = output
 
-	newObj.saveQuestions("questions.txt")
-	newObj.saveRecords("records.txt")
-	return newObj
+	//newObj.saveQuestions("questions.txt")
+	//newObj.saveRecords("records.txt")
+	return newObj, nil
 }
 
 // Question section //
@@ -44,19 +43,18 @@ func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer
 func (obj *Doggynator) loadQuestions(questionsURL string) error {
 	data, err := ioutil.ReadFile(questionsURL)
 	if err != nil {
-		fmt.Println("Questions reading error", err)
 		return err
 	}
 	obj.questions = filter(strings.Split(string(data), "\n"))
 	return nil
 }
 
-func (obj *Doggynator) saveQuestions(questionsURL string) {
-	err := ioutil.WriteFile(questionsURL, []byte(obj.QuestionsToString()), 0644)
+func (obj *Doggynator) saveQuestions(questionsURL string) (err error) {
+	err = ioutil.WriteFile(questionsURL, []byte(obj.QuestionsToString()), 0644)
 	if err != nil {
-		fmt.Println("Questions saving error", err)
 		return
 	}
+	return
 }
 
 func (obj *Doggynator) addQuestion(question string) {
@@ -73,11 +71,14 @@ func (obj *Doggynator) addQuestion(question string) {
 func (obj *Doggynator) loadRecords(recordsURL string) error {
 	data, err := ioutil.ReadFile(recordsURL)
 	if err != nil {
-		fmt.Println("Records reading error", err)
 		return err
 	}
 	rawRecords := filter(strings.Split(string(data), "\n"))
 	obj.records, err = processRawRecords(rawRecords, len(obj.questions))
+	if err != nil {
+		obj.writeln("Error processing raw records")
+		return err
+	}
 	return nil
 }
 
@@ -95,7 +96,6 @@ func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Re
 		} else {
 			newStat, err := RawStatisticConstructor(elem[:(len(elem) - 1)])
 			if err != nil {
-				fmt.Println("Failed loading raw record of Statistic", err)
 				return nil, err
 			}
 			currRecordData = append(currRecordData, *newStat)
@@ -105,15 +105,17 @@ func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Re
 	return append(records, *RecordConstructor(currRecordName, currRecordData)), nil
 }
 
-func (obj *Doggynator) saveRecords(recordsURL string) {
+func (obj *Doggynator) saveRecords(recordsURL string) (err error) {
 	var stringified string
 	for _, elem := range obj.records {
 		stringified += elem.ToString()
 	}
-	err := ioutil.WriteFile(recordsURL, []byte(stringified), 0644)
+	err = ioutil.WriteFile(recordsURL, []byte(stringified), 0644)
 	if err != nil {
-		fmt.Println("There was an issue with saving the records to a file")
+		obj.writeln("There was an issue with saving the records to a file")
+		return
 	}
+	return nil
 }
 
 // Playing Section //

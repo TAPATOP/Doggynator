@@ -2,16 +2,21 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"source"
 )
 
 func main() {
-	game := source.DoggynatorConstructor(
+	game, err := source.DoggynatorConstructor(
 		"questions.txt",
 		"records.txt",
 		bufio.NewWriter(os.Stdout),
 	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	game.Play()
 }
 
