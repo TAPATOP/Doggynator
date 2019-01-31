@@ -14,7 +14,7 @@ import (
 type Doggynator struct {
 	questions []string
 	records   []Record
-	kb        KnowledgeBase
+	dbf       DataBaseOfFacts
 	output    *bufio.Writer
 }
 
@@ -139,22 +139,22 @@ func (obj *Doggynator) Play() {
 }
 
 func (obj *Doggynator) initializeGame() {
-	obj.kb = *KnowledgeBaseConstructor(len(obj.questions))
+	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
 func (obj *Doggynator) askQuestion() (index int) {
-	if obj.kb.hasBeenAskedEveryQuestion() {
+	if obj.dbf.hasBeenAskedEveryQuestion() {
 		return -1
 	}
 	questionIndex := obj.chooseQuestionIndex()
-	obj.kb.record(0, questionIndex)
+	obj.dbf.record(0, questionIndex)
 	return questionIndex
 }
 
 func (obj *Doggynator) chooseQuestionIndex() int {
 	num := rand.Intn(len(obj.questions))
-	for obj.kb.isAsked(num) {
+	for obj.dbf.isAsked(num) {
 		num = rand.Intn(len(obj.questions))
 	}
 	return num
