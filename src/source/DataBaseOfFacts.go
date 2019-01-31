@@ -5,13 +5,20 @@ const IsAsked = 1
 type DataBaseOfFacts struct {
 	answers              []int
 	answeredIndexes      []int
+	recordProbability    []float64
 	recordedAnswerNumber int
 }
 
-func DataBaseOfFactsConstructor(size int) *DataBaseOfFacts {
+func DataBaseOfFactsConstructor(questionCount, recordsCount int) *DataBaseOfFacts {
 	obj := new(DataBaseOfFacts)
-	obj.answers = make([]int, size)
-	obj.answeredIndexes = make([]int, size)
+	obj.answers = make([]int, questionCount)
+	obj.answeredIndexes = make([]int, questionCount)
+
+	obj.recordProbability = make([]float64, recordsCount)
+	for index := range obj.recordProbability {
+		obj.recordProbability[index] = 1
+	}
+
 	return obj
 }
 

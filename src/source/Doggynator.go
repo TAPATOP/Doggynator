@@ -19,6 +19,7 @@ type Doggynator struct {
 
 func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
+	newObj.output = output
 	err := newObj.loadQuestions(questionsURL)
 	if err != nil {
 		newObj.writeln("Error loading questions!")
@@ -31,10 +32,8 @@ func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer
 		return nil, err
 	}
 
-	newObj.output = output
-
-	//newObj.saveQuestions("questions.txt")
-	//newObj.saveRecords("records.txt")
+	newObj.saveQuestions("questions.txt")
+	newObj.saveRecords("records.txt")
 	return newObj, nil
 }
 
@@ -84,7 +83,7 @@ func (obj *Doggynator) loadRecords(recordsURL string) error {
 
 func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Record, err error) {
 	currRecordName := rawRecords[0]
-	currRecordData := []Statistic{}
+	var currRecordData []Statistic
 	counter := 1
 	numberOfQuestions++
 
@@ -94,7 +93,7 @@ func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Re
 			currRecordName = elem
 			currRecordData = []Statistic{}
 		} else {
-			newStat, err := RawStatisticConstructor(elem[:(len(elem) - 1)])
+			newStat, err := RawStatisticConstructor(elem)
 			if err != nil {
 				return nil, err
 			}
@@ -112,7 +111,6 @@ func (obj *Doggynator) saveRecords(recordsURL string) (err error) {
 	}
 	err = ioutil.WriteFile(recordsURL, []byte(stringified), 0644)
 	if err != nil {
-		obj.writeln("There was an issue with saving the records to a file")
 		return
 	}
 	return nil
@@ -126,7 +124,7 @@ func (obj *Doggynator) Play() {
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
-			obj.writeln("DONT ASK ME ANYMORE, I'VE ALREADY SAID EVERYTHING I KNOW!!!")
+			obj.writeln("DON'T ASK ME ANYMORE, I'VE ALREADY SAID EVERYTHING I KNOW!!!")
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
@@ -141,7 +139,7 @@ func (obj *Doggynator) Play() {
 }
 
 func (obj *Doggynator) initializeGame() {
-	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
+	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions), len(obj.records))
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 

@@ -14,9 +14,9 @@ func (obj *Record) AddField() {
 }
 
 func (rec *Record) ToString() string {
-	stringifiedStats := "\n"
-	for _, elem := range rec.statistics {
+	stringifiedStats := rec.statistics[0].ToString() + "\n"
+	for _, elem := range rec.statistics[1:] {
 		stringifiedStats = stringifiedStats + elem.ToString() + "\n"
 	}
-	return string(rec.name + stringifiedStats)
+	return string(rec.name + "\n" + stringifiedStats)
 }

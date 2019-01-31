@@ -34,8 +34,9 @@ func NullStatisticConstructor() *Statistic {
 }
 
 func (stat *Statistic) ToString() (output string) {
-	for _, elem := range stat.data {
-		output += strconv.Itoa(elem) + " "
+	output = strconv.Itoa(stat.data[0])
+	for _, elem := range stat.data[1:] {
+		output += " " + strconv.Itoa(elem)
 	}
 	return
 }
