@@ -1,9 +1,12 @@
 package source
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -12,9 +15,10 @@ type Doggynator struct {
 	questions []string
 	records   []Record
 	kb        KnowledgeBase
+	output    *bufio.Writer
 }
 
-func DoggynatorConstructor(questionsURL, recordsURL string) *Doggynator {
+func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) *Doggynator {
 	newObj := new(Doggynator)
 	err := newObj.loadQuestions(questionsURL)
 	if err != nil {
@@ -27,6 +31,8 @@ func DoggynatorConstructor(questionsURL, recordsURL string) *Doggynator {
 		fmt.Println("Error loading records!")
 		return nil
 	}
+
+	newObj.output = output
 
 	newObj.saveQuestions("questions.txt")
 	newObj.saveRecords("records.txt")
@@ -114,10 +120,22 @@ func (obj *Doggynator) saveRecords(recordsURL string) {
 
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
-	//obj.askQuestion()
-	//obj.askQuestion()
-	//obj.askQuestion()
-	//obj.askQuestion()
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for questionIndex := obj.askQuestion(); true; {
+		if questionIndex == -1 {
+			obj.writeln("DONT ASK ME ANYMORE, I'VE ALREADY SAID EVERYTHING I KNOW!!!")
+			break
+		}
+		obj.writeln(obj.questions[questionIndex])
+		answer, err := receiveInput(scanner)
+		if err != nil {
+			obj.writeln("Bad answer!")
+			continue
+		}
+		obj.writeln(strconv.Itoa(answer))
+		questionIndex = obj.askQuestion()
+	}
 }
 
 func (obj *Doggynator) initializeGame() {
@@ -125,14 +143,13 @@ func (obj *Doggynator) initializeGame() {
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
-func (obj *Doggynator) askQuestion() {
+func (obj *Doggynator) askQuestion() (index int) {
 	if obj.kb.hasBeenAskedEveryQuestion() {
-		fmt.Println("DONT ASK ME ANYMORE, I'VE ALREADY SAID EVERYTHING I KNOW!!!")
-		return
+		return -1
 	}
 	questionIndex := obj.chooseQuestionIndex()
-	fmt.Println(obj.questions[questionIndex])
 	obj.kb.record(0, questionIndex)
+	return questionIndex
 }
 
 func (obj *Doggynator) chooseQuestionIndex() int {
@@ -141,6 +158,12 @@ func (obj *Doggynator) chooseQuestionIndex() int {
 		num = rand.Intn(len(obj.questions))
 	}
 	return num
+}
+
+func receiveInput(scanner *bufio.Scanner) (answer int, err error) {
+	scanner.Scan()
+	answer, err = strconv.Atoi(scanner.Text())
+	return
 }
 
 // Helper Methods //
@@ -160,4 +183,13 @@ func (obj *Doggynator) QuestionsToString() (stringified string) {
 		stringified += elem + "\n"
 	}
 	return
+}
+
+func (obj *Doggynator) write(message string) {
+	obj.output.WriteString(message)
+	obj.output.Flush()
+}
+
+func (obj *Doggynator) writeln(message string) {
+	obj.write(message + "\n")
 }
