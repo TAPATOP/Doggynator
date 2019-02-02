@@ -4,7 +4,7 @@ import "math"
 
 const IsAsked = 1
 
-//const ProbablyModifier = 0.5
+const ProbablyModifier = 0.5
 const MinimumProbability = 0.05
 
 type DataBaseOfFacts struct {
@@ -30,24 +30,31 @@ func DataBaseOfFactsConstructor(questionCount, recordsCount int) *DataBaseOfFact
 func (obj *DataBaseOfFacts) processResponse(questionIndex int, records []Record, response Response) {
 	switch response {
 	case Response(Yes):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0, 1)
 	case Response(No):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1, 1)
 	case Response(DontKnowOrIrrelevant):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 2)
-	case Response(ProbablyYes): //obj.processResponse(questionIndex, records, Response(Yes))
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 2, 1)
+	case Response(ProbablyYes):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0, ProbablyModifier)
 	case Response(ProbablyNo):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1, ProbablyModifier)
 	}
 }
 
-func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(questionIndex int, records []Record, answer int) {
+func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(
+	questionIndex int,
+	records []Record,
+	answer int,
+	modifier float64,
+) {
 	obj.record(answer, questionIndex)
 	for i := range records {
 		valueForMultiplication := records[i].statistics[questionIndex].getProbability(answer)
 		if valueForMultiplication < MinimumProbability {
 			valueForMultiplication = MinimumProbability
 		}
-		obj.recordProbability[i] += math.Log10(valueForMultiplication)
+		obj.recordProbability[i] += math.Log10(valueForMultiplication) * modifier
 	}
 }
 
