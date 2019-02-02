@@ -8,7 +8,7 @@ import (
 const StatisticSize = 3
 
 type Statistic struct {
-	data [StatisticSize]int
+	data [StatisticSize]int // {positive, negative, irrelevant}
 }
 
 func StatisticConstructor(input [StatisticSize]int) *Statistic {
@@ -33,6 +33,14 @@ func NullStatisticConstructor() *Statistic {
 	return StatisticConstructor([StatisticSize]int{0, 0, 0})
 }
 
+func (obj *Statistic) getProbability(index int) float64 {
+	return (float64)(obj.data[index]) / (float64)(obj.getTotalCountOf())
+}
+
+func (obj *Statistic) getTotalCountOf() int {
+	return obj.data[0] + obj.data[1] + obj.data[2]
+}
+
 func (stat *Statistic) ToString() (output string) {
 	output = strconv.Itoa(stat.data[0])
 	for _, elem := range stat.data[1:] {
@@ -40,3 +48,7 @@ func (stat *Statistic) ToString() (output string) {
 	}
 	return
 }
+
+//TODO::
+// Uncapitalize methods
+// Do some renaming of the functions

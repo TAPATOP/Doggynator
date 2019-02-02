@@ -2,6 +2,9 @@ package source
 
 const IsAsked = 1
 
+//const ProbablyModifier = 0.5
+const MinimumProbability = 0.05
+
 type DataBaseOfFacts struct {
 	answers              []int
 	answeredIndexes      []int
@@ -20,6 +23,30 @@ func DataBaseOfFactsConstructor(questionCount, recordsCount int) *DataBaseOfFact
 	}
 
 	return obj
+}
+
+func (obj *DataBaseOfFacts) processResponse(questionIndex int, records []Record, response Response) {
+	switch response {
+	case Response(Yes):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0)
+	case Response(No):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1)
+	case Response(DontKnowOrIrrelevant):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 2)
+	case Response(ProbablyYes): //obj.processResponse(questionIndex, records, Response(Yes))
+	case Response(ProbablyNo):
+	}
+}
+
+func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(questionIndex int, records []Record, answer int) {
+	for i := range records {
+		// TODO: logarithm here
+		valueForMultiplication := records[i].statistics[questionIndex].getProbability(answer)
+		if valueForMultiplication < MinimumProbability {
+			valueForMultiplication = MinimumProbability
+		}
+		obj.recordProbability[i] *= valueForMultiplication
+	}
 }
 
 func (obj *DataBaseOfFacts) record(value, index int) {

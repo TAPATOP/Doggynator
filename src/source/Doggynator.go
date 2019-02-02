@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -15,6 +14,21 @@ type Doggynator struct {
 	records   []Record
 	dbf       DataBaseOfFacts
 	output    *bufio.Writer
+}
+
+type Response int
+
+const (
+	Yes Response = iota
+	No
+	DontKnowOrIrrelevant
+	ProbablyYes
+	ProbablyNo
+	IncorrectResponse
+)
+
+func (resp Response) Integer() int {
+	return [...]int{1, 2, 3, 4, 5}[resp]
 }
 
 func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
@@ -128,12 +142,13 @@ func (obj *Doggynator) Play() {
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
-		answer, err := receiveInput(scanner)
-		if err != nil {
+		answer := receiveInput(scanner)
+		response := toResponse(answer)
+		if response == Response(IncorrectResponse) {
 			obj.writeln("Bad answer!")
 			continue
 		}
-		obj.writeln(strconv.Itoa(answer))
+		obj.processResponse(questionIndex, response)
 		questionIndex = obj.askQuestion()
 	}
 }
@@ -160,10 +175,8 @@ func (obj *Doggynator) chooseQuestionIndex() int {
 	return num
 }
 
-func receiveInput(scanner *bufio.Scanner) (answer int, err error) {
-	scanner.Scan()
-	answer, err = strconv.Atoi(scanner.Text())
-	return
+func (obj *Doggynator) processResponse(questionIndex int, response Response) {
+	obj.dbf.processResponse(questionIndex, obj.records, response)
 }
 
 // Helper Methods //
@@ -192,4 +205,27 @@ func (obj *Doggynator) write(message string) {
 
 func (obj *Doggynator) writeln(message string) {
 	obj.write(message + "\n")
+}
+
+func receiveInput(scanner *bufio.Scanner) (answer string) {
+	scanner.Scan()
+	answer = scanner.Text()
+	return
+}
+
+func toResponse(forConverting string) (value Response) {
+	switch forConverting {
+	case "yes", "y":
+		return Response(Yes)
+	case "no", "n":
+		return Response(No)
+	case "irrelevant", "don't know", "no idea", "irr", "dk":
+		return Response(DontKnowOrIrrelevant)
+	case "probably", "p", "prob":
+		return Response(ProbablyYes)
+	case "probably not", "pn", "prob no":
+		return Response(ProbablyNo)
+	default:
+		return Response(IncorrectResponse)
+	}
 }
