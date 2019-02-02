@@ -6,6 +6,7 @@ import (
 )
 
 const StatisticSize = 3
+const ReductionFactor = 2
 
 type Statistic struct {
 	data [StatisticSize]int // {positive, negative, irrelevant}
@@ -34,11 +35,21 @@ func NullStatisticConstructor() *Statistic {
 }
 
 func (obj *Statistic) getProbability(index int) float64 {
-	return (float64)(obj.data[index]) / (float64)(obj.getTotalCountOf())
+	totalCount := (float64)(obj.getTotalCountOf())
+	if totalCount == 0 {
+		totalCount = 1
+	}
+	return (float64)(obj.data[index]) / totalCount
 }
 
 func (obj *Statistic) getTotalCountOf() int {
 	return obj.data[0] + obj.data[1] + obj.data[2]
+}
+
+func (obj *Statistic) reduce() {
+	for i := range obj.data {
+		obj.data[i] = obj.data[i] / ReductionFactor
+	}
 }
 
 func (stat *Statistic) ToString() (output string) {

@@ -163,7 +163,6 @@ func (obj *Doggynator) askQuestion() (index int) {
 		return -1
 	}
 	questionIndex := obj.chooseQuestionIndex()
-	obj.dbf.record(0, questionIndex)
 	return questionIndex
 }
 

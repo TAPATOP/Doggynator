@@ -1,5 +1,7 @@
 package source
 
+import "math"
+
 const IsAsked = 1
 
 //const ProbablyModifier = 0.5
@@ -19,7 +21,7 @@ func DataBaseOfFactsConstructor(questionCount, recordsCount int) *DataBaseOfFact
 
 	obj.recordProbability = make([]float64, recordsCount)
 	for index := range obj.recordProbability {
-		obj.recordProbability[index] = 1
+		obj.recordProbability[index] = 0
 	}
 
 	return obj
@@ -39,13 +41,13 @@ func (obj *DataBaseOfFacts) processResponse(questionIndex int, records []Record,
 }
 
 func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(questionIndex int, records []Record, answer int) {
+	obj.record(answer, questionIndex)
 	for i := range records {
-		// TODO: logarithm here
 		valueForMultiplication := records[i].statistics[questionIndex].getProbability(answer)
 		if valueForMultiplication < MinimumProbability {
 			valueForMultiplication = MinimumProbability
 		}
-		obj.recordProbability[i] *= valueForMultiplication
+		obj.recordProbability[i] += math.Log10(valueForMultiplication)
 	}
 }
 
