@@ -45,7 +45,7 @@ func (obj *DataBaseOfFacts) processResponse(questionIndex int, records []Record,
 func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(
 	questionIndex int,
 	records []Record,
-	answer int,
+	answer int, // this is technically the array index of the answer in statistics' data...
 	modifier float64,
 ) {
 	obj.record(answer, questionIndex)
@@ -76,4 +76,8 @@ func (obj *DataBaseOfFacts) isAsked(index int) bool {
 
 func (obj *DataBaseOfFacts) hasBeenAskedEveryQuestion() bool {
 	return obj.recordedAnswerNumber >= len(obj.answeredIndexes)
+}
+
+func (obj *DataBaseOfFacts) saveInputToKnowledgeBase(record *Record) {
+
 }

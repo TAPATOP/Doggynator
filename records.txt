@@ -23,3 +23,18 @@ weimaraner
 99 1 0
 4 95 1
 0 100 0
+cocker spaniel
+25 65 10
+98 1 1
+15 85 0
+85 15 0
+border collie
+36 55 15
+50 50 10
+2 100 0
+0 100 0
+standard poodle
+25 80 0
+85 15 10
+25 75 0
+5 95 5

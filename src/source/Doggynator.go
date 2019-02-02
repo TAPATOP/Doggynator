@@ -13,7 +13,11 @@ type Doggynator struct {
 	questions []string
 	records   []Record
 	dbf       DataBaseOfFacts
-	output    *bufio.Writer
+	ie        InferenceEngine
+
+	output       *bufio.Writer
+	questionsURL string
+	recordsURL   string
 }
 
 type Response int
@@ -34,6 +38,9 @@ func (resp Response) Integer() int {
 func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	newObj.output = output
+	newObj.questionsURL = questionsURL
+	newObj.recordsURL = recordsURL
+
 	err := newObj.loadQuestions(questionsURL)
 	if err != nil {
 		newObj.writeln("Error loading questions!")
@@ -45,9 +52,6 @@ func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer
 		newObj.writeln("Error loading records!")
 		return nil, err
 	}
-
-	newObj.saveQuestions("questions.txt")
-	newObj.saveRecords("records.txt")
 	return newObj, nil
 }
 
@@ -63,7 +67,7 @@ func (obj *Doggynator) loadQuestions(questionsURL string) error {
 }
 
 func (obj *Doggynator) saveQuestions(questionsURL string) (err error) {
-	err = ioutil.WriteFile(questionsURL, []byte(obj.QuestionsToString()), 0644)
+	err = ioutil.WriteFile(questionsURL, []byte(*(obj.QuestionsToString())), 0644)
 	if err != nil {
 		return
 	}
@@ -142,19 +146,24 @@ func (obj *Doggynator) Play() {
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
-		answer := receiveInput(scanner)
-		response := toResponse(answer)
+		rawResponse := receiveInput(scanner)
+		response := toResponse(rawResponse)
 		if response == Response(IncorrectResponse) {
 			obj.writeln("Bad answer!")
 			continue
 		}
 		obj.processResponse(questionIndex, response)
+		answer := obj.ie.concludeAnAnswer()
+		if answer != nil {
+			obj.writeln("I think your dog is: " + answer.name)
+		}
 		questionIndex = obj.askQuestion()
 	}
 }
 
 func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions), len(obj.records))
+	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
@@ -178,6 +187,11 @@ func (obj *Doggynator) processResponse(questionIndex int, response Response) {
 	obj.dbf.processResponse(questionIndex, obj.records, response)
 }
 
+func (obj *Doggynator) finalizeGame() {
+	obj.saveQuestions(obj.questionsURL)
+	obj.saveRecords(obj.recordsURL)
+}
+
 // Helper Methods //
 
 // TODO: Could be faster?
@@ -190,9 +204,9 @@ func filter(input []string) (output []string) {
 	return output
 }
 
-func (obj *Doggynator) QuestionsToString() (stringified string) {
+func (obj *Doggynator) QuestionsToString() (stringified *string) {
 	for _, elem := range obj.questions {
-		stringified += elem + "\n"
+		*stringified += elem + "\n"
 	}
 	return
 }
@@ -206,10 +220,9 @@ func (obj *Doggynator) writeln(message string) {
 	obj.write(message + "\n")
 }
 
-func receiveInput(scanner *bufio.Scanner) (answer string) {
+func receiveInput(scanner *bufio.Scanner) string {
 	scanner.Scan()
-	answer = scanner.Text()
-	return
+	return scanner.Text()
 }
 
 func toResponse(forConverting string) (value Response) {

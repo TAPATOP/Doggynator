@@ -21,5 +21,9 @@ func main() {
 }
 
 /*
+Accidental and unneeded object copy checks
 Capital letters of constructors?
+fix these pieces of crap obj.dbf.recordProbability[candidateIndex]
+return pointers where possible
+reduce the probability of a wrong answer
 */
