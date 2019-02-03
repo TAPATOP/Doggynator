@@ -142,7 +142,10 @@ func (obj *Doggynator) Play() {
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
-			obj.writeln("DON'T ASK ME ANYMORE, I'VE ALREADY SAID EVERYTHING I KNOW!!!")
+			obj.writeln(
+				"I'm out of questions, so this is my final conclusion: " +
+					obj.ie.getBestGuess().name,
+			)
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
@@ -155,7 +158,7 @@ func (obj *Doggynator) Play() {
 		obj.processResponse(questionIndex, response)
 		answer := obj.ie.concludeAnAnswer()
 		if answer != nil {
-			obj.writeln("I think your dog is: " + answer.name)
+			obj.writeln("I think you are thinking about: " + answer.name)
 		}
 		questionIndex = obj.askQuestion()
 	}

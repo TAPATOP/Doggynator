@@ -9,8 +9,8 @@ import (
 
 func main() {
 	game, err := source.DoggynatorConstructor(
-		"questions.txt",
-		"records.txt",
+		"DogQuestions.txt",
+		"DogRecords.txt",
 		bufio.NewWriter(os.Stdout),
 	)
 	if err != nil {
@@ -26,4 +26,5 @@ Capital letters of constructors?
 fix these pieces of crap obj.dbf.recordProbability[candidateIndex]
 return pointers where possible
 reduce the probability of a wrong answer
+slices: store object addresses, not objects?
 */
