@@ -20,21 +20,6 @@ type Doggynator struct {
 	recordsURL   string
 }
 
-type Response int
-
-const (
-	Yes Response = iota
-	No
-	DontKnowOrIrrelevant
-	ProbablyYes
-	ProbablyNo
-	IncorrectResponse
-)
-
-func (resp Response) Integer() int {
-	return [...]int{1, 2, 3, 4, 5}[resp]
-}
-
 func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	newObj.output = output
@@ -74,7 +59,7 @@ func (obj *Doggynator) saveQuestions(questionsURL string) (err error) {
 	return
 }
 
-func (obj *Doggynator) addQuestion(question string) {
+func (obj *Doggynator) AddQuestion(question string) {
 	if question != "" && question != "\n" && question != "\t" && question != " " {
 		obj.questions = append(obj.questions, question)
 		for i := 0; i < len(obj.records); i++ {
@@ -143,7 +128,7 @@ func (obj *Doggynator) Play() {
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
 			obj.writeln(
-				"I'm out of questions, so this is my final conclusion: " +
+				"I'm out of questions, so this is my final guess: " +
 					obj.ie.getBestGuess().name,
 			)
 			break
@@ -226,21 +211,4 @@ func (obj *Doggynator) writeln(message string) {
 func receiveInput(scanner *bufio.Scanner) string {
 	scanner.Scan()
 	return scanner.Text()
-}
-
-func toResponse(forConverting string) (value Response) {
-	switch forConverting {
-	case "yes", "y":
-		return Response(Yes)
-	case "no", "n":
-		return Response(No)
-	case "irrelevant", "don't know", "no idea", "irr", "dk":
-		return Response(DontKnowOrIrrelevant)
-	case "probably", "p", "prob":
-		return Response(ProbablyYes)
-	case "probably not", "pn", "prob no":
-		return Response(ProbablyNo)
-	default:
-		return Response(IncorrectResponse)
-	}
 }

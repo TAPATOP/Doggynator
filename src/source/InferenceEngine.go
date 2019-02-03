@@ -5,7 +5,7 @@ import "math"
 const ConclusionFactor = 20
 const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
-const MaximumIntervalBetweenAnswers = 4
+const MaximumIntervalBetweenAnswers = 5
 
 type InferenceEngine struct {
 	records                  []Record
@@ -27,7 +27,7 @@ func (obj *InferenceEngine) concludeAnAnswer() *Record {
 		return nil
 	}
 	candidateIndex := obj.getBestGuessIndex()
-	if obj.enquiriesSinceLastAnswer < MaximumIntervalBetweenAnswers {
+	if obj.enquiriesSinceLastAnswer <= MaximumIntervalBetweenAnswers {
 		for i := range obj.dbf.recordProbability {
 			if i == candidateIndex {
 				continue
