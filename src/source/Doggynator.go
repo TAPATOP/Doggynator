@@ -14,6 +14,7 @@ type Doggynator struct {
 	records   []Record
 	dbf       DataBaseOfFacts
 	ie        InferenceEngine
+	lm        LearningMechanism
 
 	output       *bufio.Writer
 	questionsURL string
@@ -144,6 +145,9 @@ func (obj *Doggynator) Play() {
 		answer := obj.ie.concludeAnAnswer()
 		if answer != nil {
 			obj.writeln("I think you are thinking about: " + answer.name)
+			//obj.lm.learn(answer)
+			//obj.finalizeGame()
+			//return
 		}
 		questionIndex = obj.askQuestion()
 	}
@@ -152,6 +156,7 @@ func (obj *Doggynator) Play() {
 func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions), len(obj.records))
 	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
+	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
@@ -192,11 +197,12 @@ func filter(input []string) (output []string) {
 	return output
 }
 
-func (obj *Doggynator) QuestionsToString() (stringified *string) {
+func (obj *Doggynator) QuestionsToString() *string {
+	stringified := ""
 	for _, elem := range obj.questions {
-		*stringified += elem + "\n"
+		stringified += elem + "\n"
 	}
-	return
+	return &stringified
 }
 
 func (obj *Doggynator) write(message string) {
