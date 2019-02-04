@@ -185,21 +185,33 @@ func (obj *Doggynator) finalizeGame() {
 
 func (obj *Doggynator) makeGuess(answer *Record, scanner *bufio.Scanner) bool {
 	obj.writeln("I believe you are thinking about: " + answer.name)
-	return obj.askIfGuessIsCorrect(answer, scanner)
+	obj.writeln("Please say \"yes\" if I'm correct and \"no\" if I'm not")
+	return obj.askIfGuessIsCorrect(scanner)
 }
 
-func (obj *Doggynator) askIfGuessIsCorrect(record *Record, scanner *bufio.Scanner) bool {
+func (obj *Doggynator) askIfGuessIsCorrect(scanner *bufio.Scanner) bool {
+	response := obj.askForYesOrNo(scanner)
+	switch response {
+	case Response(Yes):
+		return true
+	case Response(No):
+		return false
+	default:
+		return false
+	}
+}
+
+func (obj *Doggynator) askForYesOrNo(scanner *bufio.Scanner) Response {
 	for true {
 		rawAnswer := receiveInput(scanner)
 		response := toResponse(rawAnswer)
-		switch response {
-		case Response(Yes):
-			return true
-		case Response(No):
-			return false
+		if response == Response(Yes) || response == Response(No) {
+			return response
+		} else {
+			obj.writeln("Please answer with a \"yes\" or \"no\"")
 		}
 	}
-	return false
+	return Response(IncorrectResponse)
 }
 
 // Helper Methods //

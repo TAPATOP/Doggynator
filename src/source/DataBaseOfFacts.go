@@ -78,6 +78,6 @@ func (obj *DataBaseOfFacts) hasBeenAskedEveryQuestion() bool {
 	return obj.recordedAnswerNumber >= len(obj.answeredIndexes)
 }
 
-func (obj *DataBaseOfFacts) saveInputToKnowledgeBase(record *Record) {
-
-}
+//func (obj *DataBaseOfFacts) saveInputToKnowledgeBase(record *Record) {
+//
+//}
