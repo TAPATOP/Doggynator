@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"io/ioutil"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 )
@@ -17,13 +16,15 @@ type Doggynator struct {
 	lm        LearningMechanism
 
 	output       *bufio.Writer
+	input        *bufio.Reader
 	questionsURL string
 	recordsURL   string
 }
 
-func DoggynatorConstructor(questionsURL, recordsURL string, output *bufio.Writer) (*Doggynator, error) {
+func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	newObj.output = output
+	newObj.input = input
 	newObj.questionsURL = questionsURL
 	newObj.recordsURL = recordsURL
 
@@ -124,14 +125,11 @@ func (obj *Doggynator) saveRecords(recordsURL string) (err error) {
 
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
-	scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewScanner(obj.input)
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
-			obj.writeln(
-				"I'm out of questions, so this is my final guess: " +
-					obj.ie.getBestGuess().name,
-			)
+			obj.makeGuess(obj.ie.getBestGuess(), scanner)
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
@@ -144,7 +142,7 @@ func (obj *Doggynator) Play() {
 		obj.processResponse(questionIndex, response)
 		answer := obj.ie.concludeAnAnswer()
 		if answer != nil {
-			obj.writeln("I think you are thinking about: " + answer.name)
+			obj.makeGuess(answer, scanner)
 			//obj.lm.learn(answer)
 			//obj.finalizeGame()
 			//return
@@ -183,6 +181,25 @@ func (obj *Doggynator) processResponse(questionIndex int, response Response) {
 func (obj *Doggynator) finalizeGame() {
 	obj.saveQuestions(obj.questionsURL)
 	obj.saveRecords(obj.recordsURL)
+}
+
+func (obj *Doggynator) makeGuess(answer *Record, scanner *bufio.Scanner) bool {
+	obj.writeln("I believe you are thinking about: " + answer.name)
+	return obj.askIfGuessIsCorrect(answer, scanner)
+}
+
+func (obj *Doggynator) askIfGuessIsCorrect(record *Record, scanner *bufio.Scanner) bool {
+	for true {
+		rawAnswer := receiveInput(scanner)
+		response := toResponse(rawAnswer)
+		switch response {
+		case Response(Yes):
+			return true
+		case Response(No):
+			return false
+		}
+	}
+	return false
 }
 
 // Helper Methods //

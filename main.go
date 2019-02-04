@@ -11,6 +11,7 @@ func main() {
 	game, err := source.DoggynatorConstructor(
 		"DogQuestions.txt",
 		"DogRecords.txt",
+		bufio.NewReader(os.Stdin),
 		bufio.NewWriter(os.Stdout),
 	)
 	if err != nil {
