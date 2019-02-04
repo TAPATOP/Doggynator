@@ -30,7 +30,7 @@ func RawStatisticConstructor(rawData string) (*Statistic, error) {
 	return returnObj, nil
 }
 
-func NullStatisticConstructor() *Statistic {
+func EmptyStatisticConstructor() *Statistic {
 	return StatisticConstructor([StatisticSize]int{0, 0, 0})
 }
 

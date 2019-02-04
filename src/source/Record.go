@@ -9,8 +9,16 @@ func RecordConstructor(name string, stats []Statistic) *Record {
 	return &Record{name: name, statistics: stats}
 }
 
+func EmptyRecordConstructor(name string, numberOfAttributes int) *Record {
+	stats := []Statistic{}
+	for i := 0; i < numberOfAttributes; i++ {
+		stats = append(stats, *EmptyStatisticConstructor())
+	}
+	return RecordConstructor(name, stats)
+}
+
 func (obj *Record) AddField() {
-	obj.statistics = append(obj.statistics, *NullStatisticConstructor())
+	obj.statistics = append(obj.statistics, *EmptyStatisticConstructor())
 }
 
 func (rec *Record) ToString() string {

@@ -121,6 +121,27 @@ func (obj *Doggynator) saveRecords(recordsURL string) (err error) {
 	return nil
 }
 
+func (obj *Doggynator) addRecord(scanner *bufio.Scanner) {
+	obj.writeln("Looks like I don't know what you're talking about. Please, tell me what that is")
+	recordName := strings.ToLower(receiveInput(scanner))
+	recordWithSameName := obj.contains(recordName)
+	if recordWithSameName == nil {
+		recordWithSameName = EmptyRecordConstructor(recordName, len(obj.questions))
+		obj.records = append(obj.records, *recordWithSameName)
+	}
+	obj.lm.learn(recordWithSameName)
+	obj.writeln("Thank you")
+}
+
+func (obj *Doggynator) contains(str string) *Record {
+	for i := range obj.records {
+		if obj.records[i].name == str {
+			return &obj.records[i]
+		}
+	}
+	return nil
+}
+
 // Playing Section //
 
 func (obj *Doggynator) Play() {
@@ -129,7 +150,14 @@ func (obj *Doggynator) Play() {
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
-			obj.makeGuess(obj.ie.getBestGuess(), scanner)
+			bestGuess := obj.ie.getBestGuess()
+			hasGuessed := obj.makeGuess(bestGuess, scanner)
+			if hasGuessed {
+				obj.lm.learn(bestGuess)
+				obj.boast(scanner)
+			} else {
+				obj.addRecord(scanner)
+			}
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
@@ -142,13 +170,23 @@ func (obj *Doggynator) Play() {
 		obj.processResponse(questionIndex, response)
 		answer := obj.ie.concludeAnAnswer()
 		if answer != nil {
-			obj.makeGuess(answer, scanner)
-			//obj.lm.learn(answer)
-			//obj.finalizeGame()
-			//return
+			hasGuessed := obj.makeGuess(answer, scanner)
+			if hasGuessed {
+				obj.lm.learn(answer)
+				obj.boast(scanner)
+				break
+			} else {
+				obj.writeln("Do you want to keep playing?")
+				wantsToContinue := obj.askForYesOrNo(scanner)
+				if wantsToContinue == Response(No) {
+					obj.addRecord(scanner)
+					break
+				}
+			}
 		}
 		questionIndex = obj.askQuestion()
 	}
+	obj.finalizeGame()
 }
 
 func (obj *Doggynator) initializeGame() {
@@ -212,6 +250,10 @@ func (obj *Doggynator) askForYesOrNo(scanner *bufio.Scanner) Response {
 		}
 	}
 	return Response(IncorrectResponse)
+}
+
+func (obj *Doggynator) boast(scanner *bufio.Scanner) {
+	obj.writeln("Heh, I'm so smart")
 }
 
 // Helper Methods //
