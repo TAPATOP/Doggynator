@@ -7,6 +7,7 @@ import (
 
 const StatisticSize = 3
 const ReductionFactor = 2
+const DataMaximumBeforeReduce = 100
 
 type Statistic struct {
 	data [StatisticSize]int // {positive, negative, irrelevant}
@@ -47,8 +48,10 @@ func (obj *Statistic) getTotalCountOf() int {
 }
 
 func (obj *Statistic) reduce() {
-	for i := range obj.data {
-		obj.data[i] = obj.data[i] / ReductionFactor
+	if obj.getTotalCountOf() > DataMaximumBeforeReduce {
+		for i := range obj.data {
+			obj.data[i] = obj.data[i] / ReductionFactor
+		}
 	}
 }
 

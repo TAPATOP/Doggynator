@@ -29,4 +29,5 @@ return pointers where possible
 reduce the probability of a wrong answer
 slices: store object addresses, not objects?
 remove "very intelligent"
+fucking simplify the play function
 */
