@@ -15,7 +15,7 @@ func (resp Response) Integer() int {
 	return [...]int{0, 1, 2, 3, 4}[resp]
 }
 
-func toResponse(forConverting string) (value Response) {
+func stringToResponse(forConverting string) (value Response) {
 	switch forConverting {
 	case "yes", "y":
 		return Response(Yes)
@@ -29,5 +29,18 @@ func toResponse(forConverting string) (value Response) {
 		return Response(ProbablyNo)
 	default:
 		return Response(IncorrectResponse)
+	}
+}
+
+func (resp Response) toString() string {
+	switch resp {
+	case Response(Yes):
+		return "yes"
+	case Response(No):
+		return "no"
+	case Response(DontKnowOrIrrelevant):
+		return "don't know/ irrelevant"
+	default:
+		return "o fug"
 	}
 }

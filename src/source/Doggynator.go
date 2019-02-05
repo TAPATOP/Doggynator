@@ -14,6 +14,7 @@ type Doggynator struct {
 	dbf       DataBaseOfFacts
 	ie        InferenceEngine
 	lm        LearningMechanism
+	em        ExplainingMechanism
 
 	output       *bufio.Writer
 	input        *bufio.Reader
@@ -153,8 +154,7 @@ func (obj *Doggynator) Play() {
 			bestGuess := obj.ie.getBestGuess()
 			hasGuessed := obj.makeGuess(bestGuess, scanner)
 			if hasGuessed {
-				obj.lm.learn(bestGuess)
-				obj.boast(scanner)
+				obj.processCorrectGuess(bestGuess, scanner)
 			} else {
 				obj.addRecord(scanner)
 			}
@@ -162,7 +162,7 @@ func (obj *Doggynator) Play() {
 		}
 		obj.writeln(obj.questions[questionIndex])
 		rawResponse := receiveInput(scanner)
-		response := toResponse(rawResponse)
+		response := stringToResponse(rawResponse)
 		if response == Response(IncorrectResponse) {
 			obj.writeln("Bad answer!")
 			continue
@@ -172,8 +172,7 @@ func (obj *Doggynator) Play() {
 		if answer != nil {
 			hasGuessed := obj.makeGuess(answer, scanner)
 			if hasGuessed {
-				obj.lm.learn(answer)
-				obj.boast(scanner)
+				obj.processCorrectGuess(answer, scanner)
 				break
 			} else {
 				obj.ie.reduceProbability(indexOfAnswer)
@@ -194,6 +193,7 @@ func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions), len(obj.records))
 	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
+	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 
@@ -243,7 +243,7 @@ func (obj *Doggynator) askIfGuessIsCorrect(scanner *bufio.Scanner) bool {
 func (obj *Doggynator) askForYesOrNo(scanner *bufio.Scanner) Response {
 	for true {
 		rawAnswer := receiveInput(scanner)
-		response := toResponse(rawAnswer)
+		response := stringToResponse(rawAnswer)
 		if response == Response(Yes) || response == Response(No) {
 			return response
 		} else {
@@ -255,6 +255,13 @@ func (obj *Doggynator) askForYesOrNo(scanner *bufio.Scanner) Response {
 
 func (obj *Doggynator) boast(scanner *bufio.Scanner) {
 	obj.writeln("Heh, I'm so smart")
+}
+
+func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner) {
+	obj.writeln("I made this guess because you gave the following answers:")
+	obj.writeln(*obj.em.explain(guess))
+	obj.lm.learn(guess)
+	//obj.boast(scanner)
 }
 
 // Helper Methods //

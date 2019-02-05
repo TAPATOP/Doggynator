@@ -63,6 +63,16 @@ func (stat *Statistic) ToString() (output string) {
 	return
 }
 
+func (obj *Statistic) mostProbableAnswerToAttribute() Response {
+	mostProbableIndex := 0
+	for i := range obj.data[1:] {
+		if obj.data[mostProbableIndex] < obj.data[i] {
+			mostProbableIndex = i
+		}
+	}
+	return Response(mostProbableIndex)
+}
+
 //TODO::
 // Uncapitalize methods
 // Do some renaming of the functions
