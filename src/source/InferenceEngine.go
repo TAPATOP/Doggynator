@@ -6,6 +6,7 @@ const ConclusionFactor = 20
 const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
+const MentionReductionFactor = 0.01
 
 type InferenceEngine struct {
 	records                  []Record
@@ -20,11 +21,11 @@ func InferenceEngineConstructor(records []Record, dbf *DataBaseOfFacts) *Inferen
 	return obj
 }
 
-func (obj *InferenceEngine) concludeAnAnswer() *Record {
+func (obj *InferenceEngine) concludeAnAnswer() (*Record, int) {
 	obj.enquiriesSinceLastAnswer++
 	if obj.dbf.recordedAnswerNumber < MinimumAnsweredQuestions ||
 		obj.enquiriesSinceLastAnswer < MinimumIntervalBetweenAnswers {
-		return nil
+		return nil, -1
 	}
 	candidateIndex := obj.getBestGuessIndex()
 	if obj.enquiriesSinceLastAnswer <= MaximumIntervalBetweenAnswers {
@@ -33,12 +34,12 @@ func (obj *InferenceEngine) concludeAnAnswer() *Record {
 				continue
 			}
 			if math.Abs(obj.dbf.recordProbability[i]/obj.dbf.recordProbability[candidateIndex]) < ConclusionFactor {
-				return nil
+				return nil, -1
 			}
 		}
 	}
 	obj.enquiriesSinceLastAnswer = 0
-	return &obj.records[candidateIndex]
+	return &obj.records[candidateIndex], candidateIndex
 }
 
 func (obj *InferenceEngine) getBestGuessIndex() int {
@@ -53,4 +54,8 @@ func (obj *InferenceEngine) getBestGuessIndex() int {
 
 func (obj *InferenceEngine) getBestGuess() *Record {
 	return &obj.records[obj.getBestGuessIndex()]
+}
+
+func (obj *InferenceEngine) reduceProbability(index int) {
+	obj.dbf.recordProbability[index] *= MentionReductionFactor
 }

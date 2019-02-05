@@ -168,7 +168,7 @@ func (obj *Doggynator) Play() {
 			continue
 		}
 		obj.processResponse(questionIndex, response)
-		answer := obj.ie.concludeAnAnswer()
+		answer, indexOfAnswer := obj.ie.concludeAnAnswer()
 		if answer != nil {
 			hasGuessed := obj.makeGuess(answer, scanner)
 			if hasGuessed {
@@ -176,6 +176,7 @@ func (obj *Doggynator) Play() {
 				obj.boast(scanner)
 				break
 			} else {
+				obj.ie.reduceProbability(indexOfAnswer)
 				obj.writeln("Do you want to keep playing?")
 				wantsToContinue := obj.askForYesOrNo(scanner)
 				if wantsToContinue == Response(No) {

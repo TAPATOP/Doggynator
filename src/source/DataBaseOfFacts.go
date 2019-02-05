@@ -54,7 +54,7 @@ func (obj *DataBaseOfFacts) calculateAllProbabilitiesOfAnswer(
 		if valueForMultiplication < MinimumProbability {
 			valueForMultiplication = MinimumProbability
 		}
-		obj.recordProbability[i] += math.Log10(valueForMultiplication) * modifier
+		obj.recordProbability[i] += math.Log2(valueForMultiplication) * modifier
 	}
 }
 
