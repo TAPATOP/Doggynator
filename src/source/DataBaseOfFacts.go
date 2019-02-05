@@ -30,15 +30,15 @@ func DataBaseOfFactsConstructor(questionCount, recordsCount int) *DataBaseOfFact
 func (obj *DataBaseOfFacts) processResponse(questionIndex int, records []Record, response Response) {
 	switch response {
 	case Response(Yes):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0, 1)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, response.Integer(), 1)
 	case Response(No):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1, 1)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, response.Integer(), 1)
 	case Response(DontKnowOrIrrelevant):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 2, 1)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, response.Integer(), 1)
 	case Response(ProbablyYes):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 0, ProbablyModifier)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, Response(Yes).Integer(), ProbablyModifier)
 	case Response(ProbablyNo):
-		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, 1, ProbablyModifier)
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, records, Response(No).Integer(), ProbablyModifier)
 	}
 }
 
