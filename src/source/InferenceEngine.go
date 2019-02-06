@@ -6,7 +6,7 @@ const ConclusionFactor = 20
 const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
-const MentionReductionFactor = 0.0001
+const MentionReductionFactor = 25
 
 type InferenceEngine struct {
 	records                  []Record

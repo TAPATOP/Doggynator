@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io/ioutil"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,7 +18,7 @@ type Doggynator struct {
 	em        ExplainingMechanism
 
 	output       *bufio.Writer
-	input        *bufio.Reader
+	input        *bufio.Scanner
 	questionsURL string
 	recordsURL   string
 }
@@ -25,7 +26,7 @@ type Doggynator struct {
 func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	newObj.output = output
-	newObj.input = input
+	newObj.input = bufio.NewScanner(input)
 	newObj.questionsURL = questionsURL
 	newObj.recordsURL = recordsURL
 
@@ -147,21 +148,20 @@ func (obj *Doggynator) contains(str string) *Record {
 
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
-	scanner := bufio.NewScanner(obj.input)
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
 			bestGuess := obj.ie.getBestGuess()
-			hasGuessed := obj.makeGuess(bestGuess, scanner)
+			hasGuessed := obj.makeGuess(bestGuess, obj.input)
 			if hasGuessed {
-				obj.processCorrectGuess(bestGuess, scanner)
+				obj.processCorrectGuess(bestGuess, obj.input)
 			} else {
-				obj.addRecord(scanner)
+				obj.addRecord(obj.input)
 			}
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
-		rawResponse := receiveInput(scanner)
+		rawResponse := receiveInput(obj.input)
 		response := stringToResponse(rawResponse)
 		if response == Response(IncorrectResponse) {
 			obj.writeln("Bad answer!")
@@ -170,16 +170,16 @@ func (obj *Doggynator) Play() {
 		obj.processResponse(questionIndex, response)
 		answer, indexOfAnswer := obj.ie.concludeAnAnswer()
 		if answer != nil {
-			hasGuessed := obj.makeGuess(answer, scanner)
+			hasGuessed := obj.makeGuess(answer, obj.input)
 			if hasGuessed {
-				obj.processCorrectGuess(answer, scanner)
+				obj.processCorrectGuess(answer, obj.input)
 				break
 			} else {
 				obj.ie.reduceProbability(indexOfAnswer)
 				obj.writeln("Do you want to keep playing?")
-				wantsToContinue := obj.askForYesOrNo(scanner)
+				wantsToContinue := obj.askForYesOrNo(obj.input)
 				if wantsToContinue == Response(No) {
-					obj.addRecord(scanner)
+					obj.addRecord(obj.input)
 					break
 				}
 			}
@@ -262,6 +262,35 @@ func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner
 	obj.writeln(*obj.em.explain(guess))
 	obj.lm.learn(guess)
 	//obj.boast(scanner)
+}
+
+// Menu //
+
+func (obj *Doggynator) Start() {
+	obj.writeln("Hello to Doggynator!")
+	for true {
+		obj.writeln("Please press the following numbers to execute the commands")
+		obj.writeln("1: Play")
+		obj.writeln("2: Add Question")
+		obj.writeln("3: Exit")
+		input, err := strconv.Atoi(receiveInput(obj.input))
+		if err != nil {
+			obj.writeln("Oops, looks like you messed up! Try the commands again")
+			continue
+		}
+		switch input {
+		case 1:
+			obj.Play()
+		case 2:
+			obj.writeln("Input your question")
+			question := receiveInput(obj.input)
+			obj.AddQuestion(question)
+			obj.finalizeGame()
+		case 3:
+			obj.writeln("Goodgye")
+			return
+		}
+	}
 }
 
 // Helper Methods //

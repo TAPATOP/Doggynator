@@ -18,7 +18,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	game.Play()
+	game.Start()
 }
 
 /*

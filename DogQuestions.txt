@@ -6,3 +6,7 @@ Is it black- and- white?
 Is it gray?
 Is it with an athletic build?
 Is it considered a very intelligent breed?
+Is it over 30 kilograms?
+Is it less than 10 kg?
+Is it a hunting dog?
+Is it over 40 kilograms?
