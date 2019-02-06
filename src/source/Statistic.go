@@ -65,7 +65,7 @@ func (stat *Statistic) ToString() (output string) {
 
 func (obj *Statistic) mostProbableAnswerToAttribute() Response {
 	mostProbableIndex := 0
-	for i := range obj.data[1:] {
+	for i := 1; i < len(obj.data); i++ {
 		if obj.data[mostProbableIndex] < obj.data[i] {
 			mostProbableIndex = i
 		}
