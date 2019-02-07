@@ -2,7 +2,7 @@ package source
 
 import "math"
 
-const ConclusionFactor = 20
+const ConclusionFactor = 1
 const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
@@ -35,7 +35,7 @@ func (obj *InferenceEngine) concludeAnAnswer() (*Record, int) {
 			if i == candidateIndex {
 				continue
 			}
-			if math.Abs(obj.recordProbability[i]/obj.recordProbability[candidateIndex]) < ConclusionFactor {
+			if math.Abs(obj.recordProbability[i]-obj.recordProbability[candidateIndex]) < ConclusionFactor {
 				return nil, -1
 			}
 		}

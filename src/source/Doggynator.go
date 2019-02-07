@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+const RandomQuestionProbability = 50
+
 type Doggynator struct {
 	questions []string
 	records   []Record
@@ -222,11 +224,31 @@ func (obj *Doggynator) askQuestion() (index int) {
 }
 
 func (obj *Doggynator) chooseQuestionIndex() int {
-	num := rand.Intn(len(obj.questions))
-	for obj.dbf.isAsked(num) {
-		num = rand.Intn(len(obj.questions))
+	randomNum := rand.Intn(100)
+	if randomNum > RandomQuestionProbability {
+		index := rand.Intn(len(obj.questions))
+		for obj.dbf.isAsked(index) {
+			index = rand.Intn(len(obj.questions))
+		}
+		return index
 	}
-	return num
+	return obj.getHighestEntropyIndex()
+}
+
+func (obj *Doggynator) getHighestEntropyIndex() int {
+	highestIndex := 0
+	for i := 1; i < len(obj.questions); i++ {
+		if !obj.dbf.isAsked(i) {
+			if obj.dbf.isAsked(highestIndex) {
+				highestIndex = i
+				continue
+			}
+			if obj.mutt.statistics[i].entropy() > obj.mutt.statistics[highestIndex].entropy() {
+				highestIndex = i
+			}
+		}
+	}
+	return highestIndex
 }
 
 func (obj *Doggynator) processResponse(questionIndex int, response Response) {
@@ -310,7 +332,7 @@ func (obj *Doggynator) Start() {
 			obj.AddQuestion(question)
 			obj.finalizeGame()
 		case 3:
-			obj.writeln("Goodgye")
+			obj.writeln("Goodbye")
 			return
 		}
 	}
