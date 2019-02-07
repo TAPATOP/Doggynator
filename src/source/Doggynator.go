@@ -14,7 +14,6 @@ const RandomQuestionProbability = 50
 type Doggynator struct {
 	questions []string
 	records   []Record
-	mutt      Record
 	dbf       DataBaseOfFacts
 	ie        InferenceEngine
 	lm        LearningMechanism
@@ -156,7 +155,7 @@ func (obj *Doggynator) contains(str string) *Record {
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
 
-	for questionIndex := obj.ie.askQuestion(&obj.mutt); true; {
+	for questionIndex := obj.ie.askQuestion(); true; {
 		if questionIndex == -1 {
 			obj.processIfGameIsOver()
 			break
@@ -185,7 +184,7 @@ func (obj *Doggynator) Play() {
 				}
 			}
 		}
-		questionIndex = obj.ie.askQuestion(&obj.mutt)
+		questionIndex = obj.ie.askQuestion()
 	}
 	obj.finalizeGame()
 }
@@ -205,13 +204,6 @@ func (obj *Doggynator) initializeGame() {
 	obj.ie = *InferenceEngineConstructor(obj.records, obj.questions, &obj.dbf)
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
-
-	obj.mutt = *EmptyRecordConstructor("mutt", len(obj.questions))
-	for i := range obj.records {
-		for j := range obj.questions {
-			obj.mutt.statistics[j].sumWith(&obj.records[i].statistics[j])
-		}
-	}
 
 	rand.Seed(time.Now().UTC().UnixNano())
 }

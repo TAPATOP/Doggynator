@@ -13,6 +13,7 @@ const MentionReductionFactor = 25
 
 type InferenceEngine struct {
 	records                  []Record
+	mutt                     Record
 	questions                []string
 	dbf                      *DataBaseOfFacts
 	recordProbability        []float64
@@ -25,6 +26,14 @@ func InferenceEngineConstructor(records []Record, questions []string, dbf *DataB
 	obj.questions = questions
 	obj.dbf = dbf
 	obj.recordProbability = make([]float64, len(records))
+
+	obj.mutt = *EmptyRecordConstructor("mutt", len(obj.questions))
+	for i := range obj.records {
+		for j := range obj.questions {
+			obj.mutt.statistics[j].sumWith(&obj.records[i].statistics[j])
+		}
+	}
+
 	return obj
 }
 
@@ -97,15 +106,15 @@ func (obj *InferenceEngine) reduceProbability(index int) {
 	obj.recordProbability[index] *= MentionReductionFactor
 }
 
-func (obj *InferenceEngine) askQuestion(mutt *Record) (index int) {
+func (obj *InferenceEngine) askQuestion() (index int) {
 	if obj.dbf.hasBeenAskedEveryQuestion() {
 		return -1
 	}
-	questionIndex := obj.chooseQuestionIndex(mutt)
+	questionIndex := obj.chooseQuestionIndex()
 	return questionIndex
 }
 
-func (obj *InferenceEngine) chooseQuestionIndex(mutt *Record) int {
+func (obj *InferenceEngine) chooseQuestionIndex() int {
 	randomNum := rand.Intn(100)
 	if randomNum > RandomQuestionProbability {
 		index := rand.Intn(len(obj.questions))
@@ -114,7 +123,7 @@ func (obj *InferenceEngine) chooseQuestionIndex(mutt *Record) int {
 		}
 		return index
 	}
-	return obj.getHighestEntropyIndex(mutt)
+	return obj.getHighestEntropyIndex(&obj.mutt)
 }
 
 func (obj *InferenceEngine) getHighestEntropyIndex(mutt *Record) int {
