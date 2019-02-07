@@ -11,6 +11,7 @@ const MentionReductionFactor = 25
 type InferenceEngine struct {
 	records                  []Record
 	dbf                      *DataBaseOfFacts
+	recordProbability        []float64
 	enquiriesSinceLastAnswer int
 }
 
@@ -18,6 +19,7 @@ func InferenceEngineConstructor(records []Record, dbf *DataBaseOfFacts) *Inferen
 	obj := new(InferenceEngine)
 	obj.records = records
 	obj.dbf = dbf
+	obj.recordProbability = make([]float64, len(records))
 	return obj
 }
 
@@ -29,11 +31,11 @@ func (obj *InferenceEngine) concludeAnAnswer() (*Record, int) {
 	}
 	candidateIndex := obj.getBestGuessIndex()
 	if obj.enquiriesSinceLastAnswer <= MaximumIntervalBetweenAnswers {
-		for i := range obj.dbf.recordProbability {
+		for i := range obj.recordProbability {
 			if i == candidateIndex {
 				continue
 			}
-			if math.Abs(obj.dbf.recordProbability[i]/obj.dbf.recordProbability[candidateIndex]) < ConclusionFactor {
+			if math.Abs(obj.recordProbability[i]/obj.recordProbability[candidateIndex]) < ConclusionFactor {
 				return nil, -1
 			}
 		}
@@ -44,12 +46,42 @@ func (obj *InferenceEngine) concludeAnAnswer() (*Record, int) {
 
 func (obj *InferenceEngine) getBestGuessIndex() int {
 	candidateIndex := 0
-	for i := range obj.dbf.recordProbability[1:] {
-		if obj.dbf.recordProbability[candidateIndex] < obj.dbf.recordProbability[i+1] {
+	for i := range obj.recordProbability[1:] {
+		if obj.recordProbability[candidateIndex] < obj.recordProbability[i+1] {
 			candidateIndex = i + 1
 		}
 	}
 	return candidateIndex
+}
+
+func (obj *InferenceEngine) processResponse(questionIndex int, response Response) {
+	switch response {
+	case Response(Yes):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, response.Integer(), 1)
+	case Response(No):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, response.Integer(), 1)
+	case Response(DontKnowOrIrrelevant):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, response.Integer(), 1)
+	case Response(ProbablyYes):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, Response(Yes).Integer(), ProbablyModifier)
+	case Response(ProbablyNo):
+		obj.calculateAllProbabilitiesOfAnswer(questionIndex, Response(No).Integer(), ProbablyModifier)
+	}
+}
+
+func (obj *InferenceEngine) calculateAllProbabilitiesOfAnswer(
+	questionIndex int,
+	answer int, // this is technically the array index of the answer in statistics' data...
+	modifier float64,
+) {
+	obj.dbf.record(answer, questionIndex)
+	for i := range obj.records {
+		valueForMultiplication := obj.records[i].statistics[questionIndex].getProbability(answer)
+		if valueForMultiplication < MinimumProbability {
+			valueForMultiplication = MinimumProbability
+		}
+		obj.recordProbability[i] += math.Log2(valueForMultiplication) * modifier
+	}
 }
 
 func (obj *InferenceEngine) getBestGuess() *Record {
@@ -57,5 +89,5 @@ func (obj *InferenceEngine) getBestGuess() *Record {
 }
 
 func (obj *InferenceEngine) reduceProbability(index int) {
-	obj.dbf.recordProbability[index] *= MentionReductionFactor
+	obj.recordProbability[index] *= MentionReductionFactor
 }

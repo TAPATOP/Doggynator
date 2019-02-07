@@ -198,7 +198,7 @@ func (obj *Doggynator) processIfGameIsOver() {
 }
 
 func (obj *Doggynator) initializeGame() {
-	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions), len(obj.records))
+	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
 	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
@@ -230,7 +230,7 @@ func (obj *Doggynator) chooseQuestionIndex() int {
 }
 
 func (obj *Doggynator) processResponse(questionIndex int, response Response) {
-	obj.dbf.processResponse(questionIndex, obj.records, response)
+	obj.ie.processResponse(questionIndex, response)
 }
 
 func (obj *Doggynator) finalizeGame() {
