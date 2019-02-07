@@ -12,6 +12,7 @@ import (
 type Doggynator struct {
 	questions []string
 	records   []Record
+	mutt      Record
 	dbf       DataBaseOfFacts
 	ie        InferenceEngine
 	lm        LearningMechanism
@@ -201,6 +202,14 @@ func (obj *Doggynator) initializeGame() {
 	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
+
+	obj.mutt = *EmptyRecordConstructor("mutt", len(obj.questions))
+	for i := range obj.records {
+		for j := range obj.questions {
+			obj.mutt.statistics[i].sumWith(&obj.records[i].statistics[j])
+		}
+	}
+
 	rand.Seed(time.Now().UTC().UnixNano())
 }
 

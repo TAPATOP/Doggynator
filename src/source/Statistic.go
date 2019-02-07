@@ -1,6 +1,7 @@
 package source
 
 import (
+	"math"
 	"strconv"
 	"strings"
 )
@@ -44,7 +45,37 @@ func (obj *Statistic) getProbability(index int) float64 {
 }
 
 func (obj *Statistic) getTotalCountOf() int {
-	return obj.data[0] + obj.data[1] + obj.data[2]
+	return obj.getPositive() + obj.getNegative() + obj.getUnknown()
+}
+
+func (obj *Statistic) getPositive() int {
+	return obj.data[0]
+}
+
+func (obj *Statistic) getNegative() int {
+	return obj.data[1]
+}
+
+func (obj *Statistic) getUnknown() int {
+	return obj.data[2]
+}
+
+func (obj *Statistic) setPositive(val int) {
+	obj.data[0] = val
+}
+
+func (obj *Statistic) setNegative(val int) {
+	obj.data[1] = val
+}
+
+func (obj *Statistic) setUnknown(val int) {
+	obj.data[2] = val
+}
+
+func (obj *Statistic) sumWith(stat *Statistic) {
+	obj.setPositive(obj.getPositive() + stat.getPositive())
+	obj.setNegative(obj.getNegative() + stat.getNegative())
+	obj.setUnknown(obj.getUnknown() + stat.getUnknown())
 }
 
 func (obj *Statistic) reduce() {
@@ -71,6 +102,12 @@ func (obj *Statistic) mostProbableAnswerToAttribute() Response {
 		}
 	}
 	return Response(mostProbableIndex)
+}
+
+func (obj *Statistic) entropy() float64 {
+	return -(float64)(obj.getPositive())*math.Log2((float64)(obj.getPositive())) -
+		(float64)(obj.getNegative())*math.Log2((float64)(obj.getNegative())) -
+		(float64)(obj.getUnknown())*math.Log2((float64)(obj.getUnknown()))
 }
 
 //TODO::
