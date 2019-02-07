@@ -12,16 +12,19 @@ func ExplainingMechanismConstructor(questions []string, dbf *DataBaseOfFacts) *E
 	return em
 }
 
-func (obj *ExplainingMechanism) explain(record *Record) *string {
+func (obj *ExplainingMechanism) explain(record *Record) (*string, *string) {
 	explanation := ""
+	surprised := ""
 	for i := range obj.dbf.answeredIndexes {
 		if obj.dbf.answeredIndexes[i] == IsAsked {
 			response := Response(obj.dbf.answers[i])
 			if response == record.statistics[i].mostProbableAnswerToAttribute() {
 				explanation += "\"" + response.toString() + "\" to question \"" + obj.questions[i] + "\"\n"
+			} else {
+				surprised += "\"" + response.toString() + "\" to question \"" + obj.questions[i] + "\"\n"
 			}
 		}
 	}
 	explanation = explanation[:(len(explanation) - 1)]
-	return &explanation
+	return &explanation, &surprised
 }

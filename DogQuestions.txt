@@ -10,3 +10,6 @@ Is it over 30 kilograms?
 Is it less than 10 kg?
 Is it a hunting dog?
 Is it over 40 kilograms?
+Is it a German breed?
+Does it have white on its fur?
+Is its fur completely white?

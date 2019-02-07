@@ -17,9 +17,9 @@ func (resp Response) Integer() int {
 
 func stringToResponse(forConverting string) (value Response) {
 	switch forConverting {
-	case "yes", "y":
+	case "yes", "y", "yeah", "yup", "ya", "ye", "yea":
 		return Response(Yes)
-	case "no", "n":
+	case "no", "n", "nah", "nope", "nein", "nay":
 		return Response(No)
 	case "irrelevant", "don't know", "no idea", "irr", "dk":
 		return Response(DontKnowOrIrrelevant)

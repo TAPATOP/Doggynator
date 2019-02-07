@@ -130,9 +130,12 @@ func (obj *Doggynator) addRecord(scanner *bufio.Scanner) {
 	if recordWithSameName == nil {
 		recordWithSameName = EmptyRecordConstructor(recordName, len(obj.questions))
 		obj.records = append(obj.records, *recordWithSameName)
+		obj.writeln("Hm, I didn't know about this...")
+	} else {
+		obj.writeln("Hey, I already know about this! I will update my records.")
 	}
 	obj.lm.learn(recordWithSameName)
-	obj.writeln("Thank you")
+	obj.writeln("Thank you\n")
 }
 
 func (obj *Doggynator) contains(str string) *Record {
@@ -151,13 +154,7 @@ func (obj *Doggynator) Play() {
 
 	for questionIndex := obj.askQuestion(); true; {
 		if questionIndex == -1 {
-			bestGuess := obj.ie.getBestGuess()
-			hasGuessed := obj.makeGuess(bestGuess, obj.input)
-			if hasGuessed {
-				obj.processCorrectGuess(bestGuess, obj.input)
-			} else {
-				obj.addRecord(obj.input)
-			}
+			obj.processIfGameIsOver()
 			break
 		}
 		obj.writeln(obj.questions[questionIndex])
@@ -187,6 +184,16 @@ func (obj *Doggynator) Play() {
 		questionIndex = obj.askQuestion()
 	}
 	obj.finalizeGame()
+}
+
+func (obj *Doggynator) processIfGameIsOver() {
+	bestGuess := obj.ie.getBestGuess()
+	hasGuessed := obj.makeGuess(bestGuess, obj.input)
+	if hasGuessed {
+		obj.processCorrectGuess(bestGuess, obj.input)
+	} else {
+		obj.addRecord(obj.input)
+	}
 }
 
 func (obj *Doggynator) initializeGame() {
@@ -258,8 +265,15 @@ func (obj *Doggynator) boast(scanner *bufio.Scanner) {
 }
 
 func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner) {
+	explanation, surprised := obj.em.explain(guess)
 	obj.writeln("I made this guess because you gave the following answers:")
-	obj.writeln(*obj.em.explain(guess))
+	obj.writeln(*explanation)
+	obj.writeln("")
+	if len(*surprised) > 0 {
+		obj.writeln("The following answers you gave surprised me:")
+		obj.writeln(*surprised)
+		obj.writeln("")
+	}
 	obj.lm.learn(guess)
 	//obj.boast(scanner)
 }
