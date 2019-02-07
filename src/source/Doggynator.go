@@ -206,7 +206,7 @@ func (obj *Doggynator) initializeGame() {
 	obj.mutt = *EmptyRecordConstructor("mutt", len(obj.questions))
 	for i := range obj.records {
 		for j := range obj.questions {
-			obj.mutt.statistics[i].sumWith(&obj.records[i].statistics[j])
+			obj.mutt.statistics[j].sumWith(&obj.records[i].statistics[j])
 		}
 	}
 
