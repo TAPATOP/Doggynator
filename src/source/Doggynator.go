@@ -136,6 +136,7 @@ func (obj *Doggynator) addRecord(scanner *bufio.Scanner) {
 		obj.writeln("Hm, I didn't know about this...")
 	} else {
 		obj.writeln("Hey, I already know about this! I will update my records.")
+		obj.printExplanation(recordWithSameName)
 	}
 	obj.lm.learn(recordWithSameName)
 	obj.writeln("Thank you\n")
@@ -155,7 +156,7 @@ func (obj *Doggynator) contains(str string) *Record {
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
 
-	for questionIndex := obj.askQuestion(); true; {
+	for questionIndex := obj.ie.askQuestion(&obj.mutt); true; {
 		if questionIndex == -1 {
 			obj.processIfGameIsOver()
 			break
@@ -184,7 +185,7 @@ func (obj *Doggynator) Play() {
 				}
 			}
 		}
-		questionIndex = obj.askQuestion()
+		questionIndex = obj.ie.askQuestion(&obj.mutt)
 	}
 	obj.finalizeGame()
 }
@@ -201,7 +202,7 @@ func (obj *Doggynator) processIfGameIsOver() {
 
 func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
-	obj.ie = *InferenceEngineConstructor(obj.records, &obj.dbf)
+	obj.ie = *InferenceEngineConstructor(obj.records, obj.questions, &obj.dbf)
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
 
@@ -213,42 +214,6 @@ func (obj *Doggynator) initializeGame() {
 	}
 
 	rand.Seed(time.Now().UTC().UnixNano())
-}
-
-func (obj *Doggynator) askQuestion() (index int) {
-	if obj.dbf.hasBeenAskedEveryQuestion() {
-		return -1
-	}
-	questionIndex := obj.chooseQuestionIndex()
-	return questionIndex
-}
-
-func (obj *Doggynator) chooseQuestionIndex() int {
-	randomNum := rand.Intn(100)
-	if randomNum > RandomQuestionProbability {
-		index := rand.Intn(len(obj.questions))
-		for obj.dbf.isAsked(index) {
-			index = rand.Intn(len(obj.questions))
-		}
-		return index
-	}
-	return obj.getHighestEntropyIndex()
-}
-
-func (obj *Doggynator) getHighestEntropyIndex() int {
-	highestIndex := 0
-	for i := 1; i < len(obj.questions); i++ {
-		if !obj.dbf.isAsked(i) {
-			if obj.dbf.isAsked(highestIndex) {
-				highestIndex = i
-				continue
-			}
-			if obj.mutt.statistics[i].entropy() > obj.mutt.statistics[highestIndex].entropy() {
-				highestIndex = i
-			}
-		}
-	}
-	return highestIndex
 }
 
 func (obj *Doggynator) processResponse(questionIndex int, response Response) {
@@ -296,6 +261,12 @@ func (obj *Doggynator) boast(scanner *bufio.Scanner) {
 }
 
 func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner) {
+	obj.printExplanation(guess)
+	obj.lm.learn(guess)
+	//obj.boast(scanner)
+}
+
+func (obj *Doggynator) printExplanation(guess *Record) {
 	explanation, surprised := obj.em.explain(guess)
 	obj.writeln("I made this guess because you gave the following answers:")
 	obj.writeln(*explanation)
@@ -305,8 +276,6 @@ func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner
 		obj.writeln(*surprised)
 		obj.writeln("")
 	}
-	obj.lm.learn(guess)
-	//obj.boast(scanner)
 }
 
 // Menu //

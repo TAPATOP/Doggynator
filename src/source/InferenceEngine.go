@@ -1,6 +1,9 @@
 package source
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 const ConclusionFactor = 1
 const MinimumAnsweredQuestions = 3
@@ -10,14 +13,16 @@ const MentionReductionFactor = 25
 
 type InferenceEngine struct {
 	records                  []Record
+	questions                []string
 	dbf                      *DataBaseOfFacts
 	recordProbability        []float64
 	enquiriesSinceLastAnswer int
 }
 
-func InferenceEngineConstructor(records []Record, dbf *DataBaseOfFacts) *InferenceEngine {
+func InferenceEngineConstructor(records []Record, questions []string, dbf *DataBaseOfFacts) *InferenceEngine {
 	obj := new(InferenceEngine)
 	obj.records = records
+	obj.questions = questions
 	obj.dbf = dbf
 	obj.recordProbability = make([]float64, len(records))
 	return obj
@@ -90,4 +95,40 @@ func (obj *InferenceEngine) getBestGuess() *Record {
 
 func (obj *InferenceEngine) reduceProbability(index int) {
 	obj.recordProbability[index] *= MentionReductionFactor
+}
+
+func (obj *InferenceEngine) askQuestion(mutt *Record) (index int) {
+	if obj.dbf.hasBeenAskedEveryQuestion() {
+		return -1
+	}
+	questionIndex := obj.chooseQuestionIndex(mutt)
+	return questionIndex
+}
+
+func (obj *InferenceEngine) chooseQuestionIndex(mutt *Record) int {
+	randomNum := rand.Intn(100)
+	if randomNum > RandomQuestionProbability {
+		index := rand.Intn(len(obj.questions))
+		for obj.dbf.isAsked(index) {
+			index = rand.Intn(len(obj.questions))
+		}
+		return index
+	}
+	return obj.getHighestEntropyIndex(mutt)
+}
+
+func (obj *InferenceEngine) getHighestEntropyIndex(mutt *Record) int {
+	highestIndex := 0
+	for i := 1; i < len(obj.questions); i++ {
+		if !obj.dbf.isAsked(i) {
+			if obj.dbf.isAsked(highestIndex) {
+				highestIndex = i
+				continue
+			}
+			if mutt.statistics[i].entropy() > mutt.statistics[highestIndex].entropy() {
+				highestIndex = i
+			}
+		}
+	}
+	return highestIndex
 }
