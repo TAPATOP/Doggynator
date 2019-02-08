@@ -32,14 +32,12 @@ func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader,
 	newObj.questionsURL = questionsURL
 	newObj.recordsURL = recordsURL
 
-	err := newObj.loadQuestions(questionsURL)
-	if err != nil {
+	if err := newObj.loadQuestions(questionsURL); err != nil {
 		newObj.writeln("Error loading questions!")
 		return nil, err
 	}
 
-	err = newObj.loadRecords(recordsURL)
-	if err != nil {
+	if err := newObj.loadRecords(recordsURL); err != nil {
 		newObj.writeln("Error loading records!")
 		return nil, err
 	}

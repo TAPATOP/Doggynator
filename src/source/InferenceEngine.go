@@ -5,11 +5,11 @@ import (
 	"math/rand"
 )
 
-const ConclusionFactor = 1
+const ConclusionFactor = 1.5
 const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
-const MentionReductionFactor = 25
+const MentionReductionFactor = 3
 
 type InferenceEngine struct {
 	records                  []Record
@@ -103,7 +103,7 @@ func (obj *InferenceEngine) getBestGuess() *Record {
 }
 
 func (obj *InferenceEngine) reduceProbability(index int) {
-	obj.recordProbability[index] *= MentionReductionFactor
+	obj.recordProbability[index] -= MentionReductionFactor
 }
 
 func (obj *InferenceEngine) askQuestion() (index int) {
