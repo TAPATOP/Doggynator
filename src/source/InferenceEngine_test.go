@@ -51,32 +51,57 @@ func TestProcessResponse(t *testing.T) {
 	}
 }
 
-//
-//func TestGetHighestEntropyIndex(t *testing.T) {
-//	records := []Record{
-//		*RecordConstructor(
-//			"one",
-//			[]Statistic{
-//				*StatisticConstructor([StatisticSize]int{1, 0, 0}),
-//				*StatisticConstructor([StatisticSize]int{35, 35, 0}),
-//			}),
-//		*RecordConstructor(
-//			"two",
-//			[]Statistic{
-//				*StatisticConstructor([StatisticSize]int{13, 1, 1}),
-//				*StatisticConstructor([StatisticSize]int{2, 2, 0}),
-//			}),
-//		*RecordConstructor(
-//			"three",
-//			[]Statistic{
-//				*StatisticConstructor([StatisticSize]int{0, 3, 0}),
-//				*StatisticConstructor([StatisticSize]int{4, 1, 35}),
-//			}),
-//	}
-//
-//	ie := InferenceEngineConstructor(records, )
-//
-//}
+func TestAskQuestion(t *testing.T) {
+	records := []Record{
+		*RecordConstructor(
+			"one",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{1, 1, 0}),
+				*StatisticConstructor([StatisticSize]int{100, 5, 0}),
+				*StatisticConstructor([StatisticSize]int{35, 30, 0}),
+			}),
+		*RecordConstructor(
+			"two",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{1, 1, 1}),
+				*StatisticConstructor([StatisticSize]int{3, 2, 0}),
+				*StatisticConstructor([StatisticSize]int{3, 7, 0}),
+			}),
+		*RecordConstructor(
+			"three",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{1, 1, 1}),
+				*StatisticConstructor([StatisticSize]int{100, 5, 0}),
+				*StatisticConstructor([StatisticSize]int{4, 5, 35}),
+			}),
+	}
+
+	var tests = []struct {
+		nameForMethod string
+		expected      int
+	}{
+		{nameForMethod: "AskQuestion with best entropy", expected: 2},
+		{nameForMethod: "AskQuestion with 2nd best entropy", expected: 0},
+		{nameForMethod: "AskQuestion with 3rd best entropy", expected: 1},
+		{nameForMethod: "AskQuestion with all questions already asked", expected: -1},
+	}
+
+	questions := []string{"q1", "q2", "q3"}
+
+	ie := InferenceEngineConstructor(records, questions, DataBaseOfFactsConstructor(len(questions)), &FakeRandomGenerator{})
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("AskQuestion(expected:%d)", test.expected), func(t *testing.T) {
+			result := ie.askQuestion()
+			if result != test.expected {
+				createError(t, test.nameForMethod, result, test.expected)
+			}
+			if result != -1 {
+				ie.dbf.record(0, result)
+			}
+		})
+	}
+}
 
 func createError(t *testing.T, nameOfMethod string, returned, expected int) {
 	t.Error(nameOfMethod + " returned " + strconv.Itoa(returned) + " instead of " + strconv.Itoa(expected))

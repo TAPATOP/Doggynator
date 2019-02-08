@@ -331,7 +331,7 @@ func receiveInput(scanner *bufio.Scanner) string {
 }
 
 type RandomGenerator interface {
-	Intn(limit int)
+	Intn(limit int) int
 }
 
 type DefaultRandomGenerator struct{}

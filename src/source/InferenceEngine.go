@@ -19,10 +19,10 @@ type InferenceEngine struct {
 	recordProbability        []float64
 	enquiriesSinceLastAnswer int
 
-	randomGenerator *DefaultRandomGenerator
+	randomGenerator RandomGenerator
 }
 
-func InferenceEngineConstructor(records []Record, questions []string, dbf *DataBaseOfFacts, randG *DefaultRandomGenerator) *InferenceEngine {
+func InferenceEngineConstructor(records []Record, questions []string, dbf *DataBaseOfFacts, randG RandomGenerator) *InferenceEngine {
 	obj := new(InferenceEngine)
 	obj.records = records
 	obj.questions = questions
