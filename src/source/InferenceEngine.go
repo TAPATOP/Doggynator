@@ -2,7 +2,6 @@ package source
 
 import (
 	"math"
-	"math/rand"
 )
 
 const ConclusionFactor = 1.5
@@ -19,14 +18,17 @@ type InferenceEngine struct {
 	dbf                      *DataBaseOfFacts
 	recordProbability        []float64
 	enquiriesSinceLastAnswer int
+
+	randomGenerator *DefaultRandomGenerator
 }
 
-func InferenceEngineConstructor(records []Record, questions []string, dbf *DataBaseOfFacts) *InferenceEngine {
+func InferenceEngineConstructor(records []Record, questions []string, dbf *DataBaseOfFacts, randG *DefaultRandomGenerator) *InferenceEngine {
 	obj := new(InferenceEngine)
 	obj.records = records
 	obj.questions = questions
 	obj.dbf = dbf
 	obj.recordProbability = make([]float64, len(records))
+	obj.randomGenerator = randG
 
 	obj.mutt = *EmptyRecordConstructor("mutt", len(obj.questions))
 	for i := range obj.records {
@@ -116,11 +118,11 @@ func (obj *InferenceEngine) askQuestion() (index int) {
 }
 
 func (obj *InferenceEngine) chooseQuestionIndex() int {
-	randomNum := rand.Intn(100)
+	randomNum := obj.randomGenerator.Intn(100)
 	if randomNum > RandomQuestionProbability {
-		index := rand.Intn(len(obj.questions))
+		index := obj.randomGenerator.Intn(len(obj.questions))
 		for obj.dbf.isAsked(index) {
-			index = rand.Intn(len(obj.questions))
+			index = obj.randomGenerator.Intn(len(obj.questions))
 		}
 		return index
 	}

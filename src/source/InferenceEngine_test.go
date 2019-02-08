@@ -1,6 +1,7 @@
 package source
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 )
@@ -40,11 +41,13 @@ func TestProcessResponse(t *testing.T) {
 		{nameForMethod: "Get Best Guess Index Q1 DK", input: 1, response: (DontKnowOrIrrelevant), expected: 2},
 	}
 	for _, test := range tests {
-		ie := InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{})
-		ie.processResponse(test.input, test.response)
-		if result := ie.getBestGuessIndex(); result != test.expected {
-			createError(t, test.nameForMethod, result, test.expected)
-		}
+		t.Run(fmt.Sprintf("TestProcessResponse(%d)(%s)", test.input, test.response.toString()), func(t *testing.T) {
+			ie := InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{}, &DefaultRandomGenerator{})
+			ie.processResponse(test.input, test.response)
+			if result := ie.getBestGuessIndex(); result != test.expected {
+				createError(t, test.nameForMethod, result, test.expected)
+			}
+		})
 	}
 }
 
@@ -77,4 +80,10 @@ func TestProcessResponse(t *testing.T) {
 
 func createError(t *testing.T, nameOfMethod string, returned, expected int) {
 	t.Error(nameOfMethod + " returned " + strconv.Itoa(returned) + " instead of " + strconv.Itoa(expected))
+}
+
+type FakeRandomGenerator struct{}
+
+func (obj *FakeRandomGenerator) Intn(limit int) int {
+	return 0
 }

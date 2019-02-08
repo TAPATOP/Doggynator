@@ -197,7 +197,8 @@ func (obj *Doggynator) processIfGameIsOver() {
 
 func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
-	obj.ie = *InferenceEngineConstructor(obj.records, obj.questions, &obj.dbf)
+	obj.ie = *InferenceEngineConstructor(obj.records, obj.questions, &obj.dbf, &DefaultRandomGenerator{})
+
 	obj.lm = *LearningMechanismConstructor(&obj.dbf)
 	obj.em = *ExplainingMechanismConstructor(obj.questions, &obj.dbf)
 
@@ -327,4 +328,14 @@ func (obj *Doggynator) writeln(message string) {
 func receiveInput(scanner *bufio.Scanner) string {
 	scanner.Scan()
 	return scanner.Text()
+}
+
+type RandomGenerator interface {
+	Intn(limit int)
+}
+
+type DefaultRandomGenerator struct{}
+
+func (obj *DefaultRandomGenerator) Intn(limit int) int {
+	return rand.Intn(limit)
 }
