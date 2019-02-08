@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const RandomQuestionProbability = 50
-
 type Doggynator struct {
 	questions []string
 	records   []Record

@@ -32,4 +32,5 @@ remove "very intelligent"
 fucking simplify the play function
 move recordProbability from dbf to ie
 IE: valueForMultiplication == 0
+hide the objects call in a function
 */

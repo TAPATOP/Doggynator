@@ -10,6 +10,7 @@ const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
 const MentionReductionFactor = 3
+const RandomQuestionProbability = 50
 
 type InferenceEngine struct {
 	records                  []Record
@@ -123,10 +124,10 @@ func (obj *InferenceEngine) chooseQuestionIndex() int {
 		}
 		return index
 	}
-	return obj.getHighestEntropyIndex(&obj.mutt)
+	return obj.getHighestEntropyIndex()
 }
 
-func (obj *InferenceEngine) getHighestEntropyIndex(mutt *Record) int {
+func (obj *InferenceEngine) getHighestEntropyIndex() int {
 	highestIndex := 0
 	for i := 1; i < len(obj.questions); i++ {
 		if !obj.dbf.isAsked(i) {
@@ -134,7 +135,7 @@ func (obj *InferenceEngine) getHighestEntropyIndex(mutt *Record) int {
 				highestIndex = i
 				continue
 			}
-			if mutt.statistics[i].entropy() > mutt.statistics[highestIndex].entropy() {
+			if obj.mutt.statistics[i].entropy() > obj.mutt.statistics[highestIndex].entropy() {
 				highestIndex = i
 			}
 		}

@@ -1,7 +1,6 @@
 package source
 
 const IsAsked = 1
-
 const ProbablyModifier = 0.5
 const MinimumProbability = 0.05
 
