@@ -1,5 +1,7 @@
 package source
 
+const StartingRecordValue = 2
+
 type Record struct {
 	name       string
 	statistics []Statistic
@@ -18,7 +20,7 @@ func EmptyRecordConstructor(name string, numberOfAttributes int) *Record {
 }
 
 func (obj *Record) AddField() {
-	obj.statistics = append(obj.statistics, *EmptyStatisticConstructor())
+	obj.statistics = append(obj.statistics, *StatisticConstructor([StatisticSize]int{StartingRecordValue, StartingRecordValue, StartingRecordValue}))
 }
 
 func (rec *Record) ToString() string {

@@ -339,3 +339,10 @@ type DefaultRandomGenerator struct{}
 func (obj *DefaultRandomGenerator) Intn(limit int) int {
 	return rand.Intn(limit)
 }
+
+// : Properties : //
+// reduce records
+// minimum answers
+// minimum distance between guesses
+// logarithms
+// reduce probability of wrong answer

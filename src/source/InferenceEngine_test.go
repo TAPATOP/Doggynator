@@ -126,11 +126,11 @@ func TestConcludeAnAnswer(t *testing.T) {
 		*RecordConstructor(
 			"three",
 			[]Statistic{
-				*StatisticConstructor([StatisticSize]int{1, 3, 0}),
+				*StatisticConstructor([StatisticSize]int{1, 3, 55}),
 				*StatisticConstructor([StatisticSize]int{4, 1, 35}),
-				*StatisticConstructor([StatisticSize]int{4, 1, 35}),
-				*StatisticConstructor([StatisticSize]int{3, 3, 0}),
-				*StatisticConstructor([StatisticSize]int{4, 4, 35}),
+				*StatisticConstructor([StatisticSize]int{4, 1, 1}),
+				*StatisticConstructor([StatisticSize]int{2, 1, 35}),
+				*StatisticConstructor([StatisticSize]int{1, 2, 35}),
 			}),
 	}
 
@@ -140,20 +140,22 @@ func TestConcludeAnAnswer(t *testing.T) {
 	}
 
 	var tests = []struct {
-		nameForMethod string
-		input         []Input
-		expected      int
+		nameForMethod            string
+		input                    []Input
+		enquiriesSinceLastAnswer int
+		expected                 int
 	}{
 		{
 			nameForMethod: "Conclude the second answer",
 			input: []Input{
 				{0, DontKnowOrIrrelevant},
-				{1, Yes},
+				{1, DontKnowOrIrrelevant},
 				{2, No},
 				{3, No},
 				{4, No},
 			},
-			expected: 1,
+			enquiriesSinceLastAnswer: MinimumAnsweredQuestions + MaximumIntervalBetweenAnswers,
+			expected:                 1,
 		},
 		{
 			nameForMethod: "Conclude the first answer",
@@ -164,7 +166,20 @@ func TestConcludeAnAnswer(t *testing.T) {
 				{3, Yes},
 				{4, Yes},
 			},
-			expected: 0,
+			enquiriesSinceLastAnswer: MinimumAnsweredQuestions + MaximumIntervalBetweenAnswers + 2,
+			expected:                 0,
+		},
+		{
+			nameForMethod: "Conclude the third highly probable answer",
+			input: []Input{
+				{0, Yes},
+				{1, No},
+				{2, Yes},
+				{3, DontKnowOrIrrelevant},
+				{4, DontKnowOrIrrelevant},
+			},
+			enquiriesSinceLastAnswer: MaximumIntervalBetweenAnswers - 1,
+			expected:                 2,
 		},
 	}
 
@@ -173,7 +188,7 @@ func TestConcludeAnAnswer(t *testing.T) {
 		for _, input := range test.input {
 			ie.processResponse(input.index, input.response)
 		}
-		ie.enquiriesSinceLastAnswer = 500
+		ie.enquiriesSinceLastAnswer = test.enquiriesSinceLastAnswer
 		_, resultIndex := ie.concludeAnAnswer()
 		if resultIndex != test.expected {
 			createError(t, test.nameForMethod, resultIndex, test.expected)
