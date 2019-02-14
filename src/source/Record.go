@@ -12,7 +12,7 @@ func RecordConstructor(name string, stats []Statistic) *Record {
 }
 
 func EmptyRecordConstructor(name string, numberOfAttributes int) *Record {
-	stats := []Statistic{}
+	var stats []Statistic
 	for i := 0; i < numberOfAttributes; i++ {
 		stats = append(stats, *EmptyStatisticConstructor())
 	}

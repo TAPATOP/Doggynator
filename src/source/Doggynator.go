@@ -32,11 +32,13 @@ func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader,
 
 	if err := newObj.loadQuestions(questionsURL); err != nil {
 		newObj.writeln("Error loading questions!")
+		newObj.writeErr(err)
 		return nil, err
 	}
 
 	if err := newObj.loadRecords(recordsURL); err != nil {
 		newObj.writeln("Error loading records!")
+		newObj.writeErr(err)
 		return nil, err
 	}
 	return newObj, nil
@@ -81,6 +83,7 @@ func (obj *Doggynator) loadRecords(recordsURL string) error {
 	obj.records, err = processRawRecords(rawRecords, len(obj.questions))
 	if err != nil {
 		obj.writeln("Error processing raw records")
+		obj.writeErr(err)
 		return err
 	}
 	return nil
@@ -323,6 +326,10 @@ func (obj *Doggynator) write(message string) {
 
 func (obj *Doggynator) writeln(message string) {
 	obj.write(message + "\n")
+}
+
+func (obj *Doggynator) writeErr(err error) {
+	obj.writeln(err.Error())
 }
 
 func receiveInput(scanner *bufio.Scanner) string {
