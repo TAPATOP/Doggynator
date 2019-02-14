@@ -45,10 +45,44 @@ func TestProcessResponse(t *testing.T) {
 			ie := InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{}, &DefaultRandomGenerator{})
 			ie.processResponse(test.input, test.response)
 			if result := ie.getBestGuessIndex(); result != test.expected {
-				createError(t, test.nameForMethod, result, test.expected)
+				createErrorWhenExpectingInt(t, test.nameForMethod, result, test.expected)
 			}
 		})
 	}
+}
+
+func ExampleDoggynator_TestProcessResponse() {
+
+	records := []Record{
+		*RecordConstructor(
+			"one",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{1, 0, 0}),
+				*StatisticConstructor([StatisticSize]int{35, 35, 0}),
+			}),
+		*RecordConstructor(
+			"two",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{13, 1, 1}),
+				*StatisticConstructor([StatisticSize]int{2, 2, 0}),
+			}),
+		*RecordConstructor(
+			"three",
+			[]Statistic{
+				*StatisticConstructor([StatisticSize]int{0, 3, 0}),
+				*StatisticConstructor([StatisticSize]int{4, 1, 35}),
+			}),
+	}
+	ie := InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{}, &DefaultRandomGenerator{})
+	ie.processResponse(0, Yes)
+	fmt.Println(strconv.Itoa(ie.getBestGuessIndex()))
+
+	ie = InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{}, &DefaultRandomGenerator{})
+	ie.processResponse(0, No)
+	fmt.Println(strconv.Itoa(ie.getBestGuessIndex()))
+	// Output:
+	// 0
+	// 2
 }
 
 func TestAskQuestion(t *testing.T) {
@@ -94,7 +128,7 @@ func TestAskQuestion(t *testing.T) {
 		t.Run(fmt.Sprintf("AskQuestion(expected:%d)", test.expected), func(t *testing.T) {
 			result := ie.askQuestion()
 			if result != test.expected {
-				createError(t, test.nameForMethod, result, test.expected)
+				createErrorWhenExpectingInt(t, test.nameForMethod, result, test.expected)
 			}
 			if result != -1 {
 				ie.dbf.record(0, result)
@@ -183,6 +217,7 @@ func TestConcludeAnAnswer(t *testing.T) {
 		},
 	}
 
+	// TODO: Subtest this
 	for _, test := range tests {
 		ie := InferenceEngineConstructor(records, []string{}, DataBaseOfFactsConstructor(len(records[0].statistics)), &FakeRandomGenerator{})
 		for _, input := range test.input {
@@ -191,15 +226,19 @@ func TestConcludeAnAnswer(t *testing.T) {
 		ie.enquiriesSinceLastAnswer = test.enquiriesSinceLastAnswer
 		_, resultIndex := ie.concludeAnAnswer()
 		if resultIndex != test.expected {
-			createError(t, test.nameForMethod, resultIndex, test.expected)
+			createErrorWhenExpectingInt(t, test.nameForMethod, resultIndex, test.expected)
 		}
 	}
 }
 
 // Helper stuff //
 
-func createError(t *testing.T, nameOfMethod string, returned, expected int) {
+func createErrorWhenExpectingInt(t *testing.T, nameOfMethod string, returned, expected int) {
 	t.Error(nameOfMethod + " returned " + strconv.Itoa(returned) + " instead of " + strconv.Itoa(expected))
+}
+
+func createErrorWhenExpectingString(t *testing.T, nameOfMethod string, returned, expected string) {
+	t.Error(nameOfMethod + " returned " + returned + " instead of " + expected)
 }
 
 type FakeRandomGenerator struct{}

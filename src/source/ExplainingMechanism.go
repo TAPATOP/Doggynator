@@ -16,7 +16,7 @@ func (obj *ExplainingMechanism) explain(record *Record) (*string, *string) {
 	explanation := ""
 	surprised := ""
 	for i := range obj.dbf.answeredIndexes {
-		if obj.dbf.answeredIndexes[i] == IsAsked {
+		if obj.dbf.answeredIndexes[i] == IsAnswered {
 			response := Response(obj.dbf.answers[i])
 			mostProbableAnswer := record.statistics[i].mostProbableAnswerToAttribute()
 			if response == mostProbableAnswer {
