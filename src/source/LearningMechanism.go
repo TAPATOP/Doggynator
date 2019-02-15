@@ -15,8 +15,8 @@ func LearningMechanismConstructor(dbf *DataBaseOfFacts) *LearningMechanism {
 func (obj *LearningMechanism) learn(record *Record) {
 	for i := range obj.dbf.answeredIndexes {
 		if obj.dbf.answeredIndexes[i] == IsAnswered {
-			record.statistics[i].reduce()
 			record.statistics[i].data[obj.dbf.answers[i]] += LearningIncrease
+			record.statistics[i].reduce()
 		}
 	}
 }
