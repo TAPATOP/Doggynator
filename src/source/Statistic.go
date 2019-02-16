@@ -24,7 +24,7 @@ func RawStatisticConstructor(rawData string) (*Statistic, error) {
 	for index, elem := range splitString {
 		newNumber, err := strconv.Atoi(elem)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		readyData[index] = newNumber
 	}

@@ -9,8 +9,8 @@ import (
 
 func main() {
 	game, err := source.DoggynatorConstructor(
-		"DogQuestions.txt",
-		"DogRecords.txt",
+		"AnimalQuestions.txt",
+		"AnimalRecords.txt",
 		bufio.NewReader(os.Stdin),
 		bufio.NewWriter(os.Stdout),
 	)
