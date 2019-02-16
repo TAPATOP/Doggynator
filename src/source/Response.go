@@ -1,5 +1,9 @@
 package source
 
+import (
+	"strings"
+)
+
 type Response int
 
 const (
@@ -16,7 +20,7 @@ func (resp Response) Integer() int {
 }
 
 func stringToResponse(forConverting string) (value Response) {
-	switch forConverting {
+	switch strings.ToLower(forConverting) {
 	case "yes", "y", "yeah", "yup", "ya", "ye", "yea":
 		return Response(Yes)
 	case "no", "n", "nah", "nope", "nein", "nay":
