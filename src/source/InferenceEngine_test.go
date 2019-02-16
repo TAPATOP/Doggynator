@@ -217,17 +217,18 @@ func TestConcludeAnAnswer(t *testing.T) {
 		},
 	}
 
-	// TODO: Subtest this
 	for _, test := range tests {
-		ie := InferenceEngineConstructor(records, []string{}, DataBaseOfFactsConstructor(len(records[0].statistics)), &FakeRandomGenerator{})
-		for _, input := range test.input {
-			ie.processResponse(input.index, input.response)
-		}
-		ie.enquiriesSinceLastAnswer = test.enquiriesSinceLastAnswer
-		_, resultIndex := ie.concludeAnAnswer()
-		if resultIndex != test.expected {
-			createErrorWhenExpectingInt(t, test.nameForMethod, resultIndex, test.expected)
-		}
+		t.Run(fmt.Sprintf("%s(expected:%d)", test.nameForMethod, test.expected), func(t *testing.T) {
+			ie := InferenceEngineConstructor(records, []string{}, DataBaseOfFactsConstructor(len(records[0].statistics)), &FakeRandomGenerator{})
+			for _, input := range test.input {
+				ie.processResponse(input.index, input.response)
+			}
+			ie.enquiriesSinceLastAnswer = test.enquiriesSinceLastAnswer
+			_, resultIndex := ie.concludeAnAnswer()
+			if resultIndex != test.expected {
+				createErrorWhenExpectingInt(t, test.nameForMethod, resultIndex, test.expected)
+			}
+		})
 	}
 }
 

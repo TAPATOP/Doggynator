@@ -94,7 +94,7 @@ func (stat *Statistic) ToString() (output string) {
 	return
 }
 
-func (obj *Statistic) mostProbableAnswerToAttribute() Response {
+func (obj *Statistic) mostProbableAnswer() Response {
 	mostProbableIndex := 0
 	for i := 1; i < len(obj.data); i++ {
 		if obj.data[mostProbableIndex] < obj.data[i] {
