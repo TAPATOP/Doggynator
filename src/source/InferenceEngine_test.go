@@ -41,7 +41,7 @@ func TestProcessResponse(t *testing.T) {
 		{nameForMethod: "Get Best Guess Index Q1 DK", input: 1, response: DontKnowOrIrrelevant, expected: 2},
 	}
 	for _, test := range tests {
-		t.Run(fmt.Sprintf("TestProcessResponse(%d)(%s)", test.input, test.response.toString()), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestProcessResponse(%d)(%s)", test.input, test.response.ToString()), func(t *testing.T) {
 			ie := InferenceEngineConstructor(records, []string{}, &DataBaseOfFacts{}, &DefaultRandomGenerator{})
 			ie.processResponse(test.input, test.response)
 			if result := ie.getBestGuessIndex(); result != test.expected {
@@ -235,11 +235,11 @@ func TestConcludeAnAnswer(t *testing.T) {
 // Helper stuff //
 
 func createErrorWhenExpectingInt(t *testing.T, nameOfMethod string, returned, expected int) {
-	t.Error(nameOfMethod + " returned " + strconv.Itoa(returned) + " instead of " + strconv.Itoa(expected))
+	t.Error(nameOfMethod + " RETURNED " + strconv.Itoa(returned) + " INSTEAD OF " + strconv.Itoa(expected))
 }
 
 func createErrorWhenExpectingString(t *testing.T, nameOfMethod string, returned, expected string) {
-	t.Error(nameOfMethod + " returned " + returned + " instead of " + expected)
+	t.Error(nameOfMethod + " RETURNED " + returned + " INSTEAD OF " + expected)
 }
 
 type FakeRandomGenerator struct{}

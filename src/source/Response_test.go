@@ -48,7 +48,7 @@ func TestStringToResponse(t *testing.T) {
 		t.Run(fmt.Sprintf("Response::StringToResponse(%d)", index), func(t *testing.T) {
 			result := stringToResponse(test.input)
 			if result != test.expected {
-				createErrorWhenExpectingString(t, "StringToResponse", result.toString(), test.expected.toString())
+				createErrorWhenExpectingString(t, "StringToResponse", result.ToString(), test.expected.ToString())
 			}
 		})
 	}

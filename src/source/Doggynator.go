@@ -260,9 +260,11 @@ func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner
 
 func (obj *Doggynator) printExplanation(guess *Record) {
 	explanation, surprised := obj.em.explain(guess)
-	obj.writeln("I made this guess because you gave the following answers:")
-	obj.writeln(*explanation)
-	obj.writeln("")
+	if len(*explanation) > 0 {
+		obj.writeln("I made this guess because you gave the following answers:")
+		obj.writeln(*explanation)
+		obj.writeln("")
+	}
 	if len(*surprised) > 0 {
 		obj.writeln("The following answers you gave surprised me:")
 		obj.writeln(*surprised)

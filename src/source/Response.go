@@ -36,7 +36,7 @@ func stringToResponse(forConverting string) (value Response) {
 	}
 }
 
-func (resp Response) toString() string {
+func (resp Response) ToString() string {
 	switch resp {
 	case Response(Yes):
 		return "yes"

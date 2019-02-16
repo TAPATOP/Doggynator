@@ -79,7 +79,7 @@ func TestMostProbableAnswer(t *testing.T) {
 		t.Run(fmt.Sprintf("%s(expected:%d)", test.nameForMethod, test.expected), func(t *testing.T) {
 			result := test.input.mostProbableAnswer()
 			if result != test.expected {
-				createErrorWhenExpectingString(t, test.nameForMethod, result.toString(), test.expected.toString())
+				createErrorWhenExpectingString(t, test.nameForMethod, result.ToString(), test.expected.ToString())
 			}
 		})
 	}

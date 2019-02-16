@@ -20,13 +20,34 @@ func (obj *ExplainingMechanism) explain(record *Record) (*string, *string) {
 			response := Response(obj.dbf.answers[i])
 			mostProbableAnswer := record.statistics[i].mostProbableAnswer()
 			if response == mostProbableAnswer {
-				explanation += "\"" + response.toString() + "\" to question \"" + obj.questions[i] + "\"\n"
+				explanation += generateExplanationLn(response, obj.questions[i])
 			} else {
-				surprised += "\"" + response.toString() + "\" to question \"" + obj.questions[i] + "\""
-				surprised += ". I expected \"" + mostProbableAnswer.toString() + "\"\n"
+				surprised += generateSurprisedLn(response, mostProbableAnswer, obj.questions[i])
 			}
 		}
 	}
-	explanation = explanation[:(len(explanation) - 1)]
+	if len(explanation) > 0 {
+		explanation = explanation[:(len(explanation) - 1)]
+	}
+	if len(surprised) > 0 {
+		surprised = surprised[:(len(surprised) - 1)]
+	}
 	return &explanation, &surprised
+}
+
+func generateExplanation(response Response, question string) string {
+	return "\"" + response.ToString() + "\" to question \"" + question + "\""
+}
+
+func generateExplanationLn(response Response, question string) string {
+	return generateExplanation(response, question) + "\n"
+}
+
+func generateSurprised(response, expected Response, question string) string {
+	return "\"" + response.ToString() + "\" to question \"" + question + "\"" +
+		". I expected \"" + expected.ToString() + "\""
+}
+
+func generateSurprisedLn(response, expected Response, question string) string {
+	return generateSurprised(response, expected, question) + "\n"
 }
