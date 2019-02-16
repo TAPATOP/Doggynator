@@ -24,13 +24,9 @@ func main() {
 /*
 Accidental and unneeded object copy checks
 Capital letters of constructors?
-fix these pieces of crap obj.dbf.recordProbability[candidateIndex]
 return pointers where possible
-reduce the probability of a wrong answer
-slices: store object addresses, not objects?
 remove "very intelligent"
 fucking simplify the play function
-move recordProbability from dbf to ie
 IE: valueForMultiplication == 0
 hide the objects call in a function
 */

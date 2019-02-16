@@ -9,6 +9,22 @@ import (
 	"time"
 )
 
+// Doggynator is the main Expert System file
+// It's called like this becaue of it's original application sphere and
+// because it would take too long to fix it now
+// It's main components are KnowledgeBase, DatabaseOfFacts,
+// InferenceEngine, LearningMechanism and ExplainingMechanism
+// KnowledgeBase, represented by "questions" and "records and should
+// be separate object, but again, time is against me
+// The other components will be described in their separate definitions
+// Other than these building blocks, the System also has an "output" and
+// "input" objects in order for the informtion flow to be easily redirectable
+// (for example this would come very handy in the case of implementing a GUI)
+// It also memorises where its questions and records are stored in order
+// to have better control over the actions over them.
+//
+// If you want to start the system, you would call Doggynator.Start(), which
+// shows a menu in the console, at least for now.
 type Doggynator struct {
 	questions []string
 	records   []Record
@@ -23,6 +39,9 @@ type Doggynator struct {
 	recordsURL   string
 }
 
+// DoggynatorConstructor is the standard constructor
+// and other than copying the passed parameters, it also
+// loads the questions and records data from their files
 func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader, output *bufio.Writer) (*Doggynator, error) {
 	newObj := new(Doggynator)
 	newObj.output = output
@@ -30,13 +49,13 @@ func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader,
 	newObj.questionsURL = questionsURL
 	newObj.recordsURL = recordsURL
 
-	if err := newObj.loadQuestions(questionsURL); err != nil {
+	if err := newObj.loadQuestions(); err != nil {
 		newObj.writeln("Error loading questions!")
 		newObj.writeErr(err)
 		return nil, err
 	}
 
-	if err := newObj.loadRecords(recordsURL); err != nil {
+	if err := newObj.loadRecords(); err != nil {
 		newObj.writeln("Error loading records!")
 		newObj.writeErr(err)
 		return nil, err
@@ -46,8 +65,11 @@ func DoggynatorConstructor(questionsURL, recordsURL string, input *bufio.Reader,
 
 // Question section //
 
-func (obj *Doggynator) loadQuestions(questionsURL string) error {
-	data, err := ioutil.ReadFile(questionsURL)
+// loadQuestions uses the saved inside the System
+// variable questionsURL to fetch the information
+// from the corresponding file
+func (obj *Doggynator) loadQuestions() error {
+	data, err := ioutil.ReadFile(obj.questionsURL)
 	if err != nil {
 		return err
 	}
@@ -55,14 +77,21 @@ func (obj *Doggynator) loadQuestions(questionsURL string) error {
 	return nil
 }
 
-func (obj *Doggynator) saveQuestions(questionsURL string) (err error) {
-	err = ioutil.WriteFile(questionsURL, []byte(*(obj.QuestionsToString())), 0644)
+// saveQuestions saves the questions slice into the
+// file, corresponding to questionURL
+func (obj *Doggynator) saveQuestions() (err error) {
+	err = ioutil.WriteFile(obj.questionsURL, []byte(*(obj.questionsToString())), 0644)
 	if err != nil {
 		return
 	}
 	return
 }
 
+// AddQuestion is used by the player to add a new
+// question. It increases the size of all records data by one
+// and fills it with preset data in order to guarantee
+// high starting entropy, thus ensuring we quickly gain information
+// about the new question
 func (obj *Doggynator) AddQuestion(question string) {
 	if question != "" && question != "\n" && question != "\t" && question != " " {
 		obj.questions = append(obj.questions, question)
@@ -74,8 +103,10 @@ func (obj *Doggynator) AddQuestion(question string) {
 
 // Records Section //
 
-func (obj *Doggynator) loadRecords(recordsURL string) error {
-	data, err := ioutil.ReadFile(recordsURL)
+// loadRecords loads all records from the saved
+// recordsURL in the Doggynator's members
+func (obj *Doggynator) loadRecords() error {
+	data, err := ioutil.ReadFile(obj.recordsURL)
 	if err != nil {
 		return err
 	}
@@ -89,6 +120,9 @@ func (obj *Doggynator) loadRecords(recordsURL string) error {
 	return nil
 }
 
+// processRawRecords receives a string that has been
+// directly read from a file and constructs/ returns a slice
+// of Records
 func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Record, err error) {
 	currRecordName := rawRecords[0]
 	var currRecordData []Statistic
@@ -112,18 +146,22 @@ func processRawRecords(rawRecords []string, numberOfQuestions int) (records []Re
 	return append(records, *RecordConstructor(currRecordName, currRecordData)), nil
 }
 
-func (obj *Doggynator) saveRecords(recordsURL string) (err error) {
+// saveRecords saves the records in their current state
+// into the file that is saved within the Doggynator
+func (obj *Doggynator) saveRecords() (err error) {
 	var stringified string
 	for _, elem := range obj.records {
 		stringified += elem.ToString()
 	}
-	err = ioutil.WriteFile(recordsURL, []byte(stringified), 0644)
+	err = ioutil.WriteFile(obj.recordsURL, []byte(stringified), 0644)
 	if err != nil {
 		return
 	}
 	return nil
 }
 
+// addRecord creates a new Record with
+// nullified data into the slice
 func (obj *Doggynator) addRecord(scanner *bufio.Scanner) {
 	obj.writeln("Looks like I don't know what you're talking about. Please, tell me what that is")
 	recordName := strings.ToLower(receiveInput(scanner))
@@ -140,6 +178,9 @@ func (obj *Doggynator) addRecord(scanner *bufio.Scanner) {
 	obj.writeln("Thank you\n")
 }
 
+// contains is used when checking whether a Record that
+// is about to be added already exists. Returns the found Record
+// if so
 func (obj *Doggynator) contains(str string) *Record {
 	for i := range obj.records {
 		if obj.records[i].name == str {
@@ -151,6 +192,21 @@ func (obj *Doggynator) contains(str string) *Record {
 
 // Playing Section //
 
+// Play is where the System tries to guess
+// what the player is thinking about. It begins by
+// initializing the required resources. Then it starts asking
+// questions according to some criteria, defined by askQuestions.
+// The game makes a guess when it's out of questions to ask or
+// when a certain record is a lot more probable than another one.
+//
+// It gets its input from the input object, declared in the System's methods.
+// In case of bad input, asks the same question again
+//
+// In case of a correct guess, the System records the new values for the guessed Record
+// In case of an incorrect guess, it asks if the player wants to keep playing.
+// If he doesn't want to, asks for the name of the Record and either updates an
+// old Record or creates a new one
+// Same thing happens if there are no more questions to be asked
 func (obj *Doggynator) Play() {
 	obj.initializeGame()
 
@@ -188,6 +244,8 @@ func (obj *Doggynator) Play() {
 	obj.finalizeGame()
 }
 
+// processIfGameIsOver handles the logic related to finishing
+// the game after a final guess has been made
 func (obj *Doggynator) processIfGameIsOver() {
 	bestGuess := obj.ie.getBestGuess()
 	hasGuessed := obj.makeGuess(bestGuess, obj.input)
@@ -198,6 +256,10 @@ func (obj *Doggynator) processIfGameIsOver() {
 	}
 }
 
+// initializeGame creates the needed data structures
+// in order for the system to work properly.
+// It's used during game resets to ensure the game doesn't
+// have junk left over from the last play
 func (obj *Doggynator) initializeGame() {
 	obj.dbf = *DataBaseOfFactsConstructor(len(obj.questions))
 	obj.ie = *InferenceEngineConstructor(obj.records, obj.questions, &obj.dbf, &DefaultRandomGenerator{})
@@ -212,17 +274,23 @@ func (obj *Doggynator) processResponse(questionIndex int, response Response) {
 	obj.ie.processResponse(questionIndex, response)
 }
 
+// finalizeGame is the final step of finishing a game,
+// it saves the currently known data into the files
 func (obj *Doggynator) finalizeGame() {
-	obj.saveQuestions(obj.questionsURL)
-	obj.saveRecords(obj.recordsURL)
+	obj.saveQuestions()
+	obj.saveRecords()
 }
 
+// makeGuess is just a formatting function for asking the player if
+// the system is correct in its guess
 func (obj *Doggynator) makeGuess(answer *Record, scanner *bufio.Scanner) bool {
 	obj.writeln("I believe you are thinking about: " + answer.name)
 	obj.writeln("Please say \"yes\" if I'm correct and \"no\" if I'm not")
 	return obj.askIfGuessIsCorrect(scanner)
 }
 
+// askIfGuessIsCorrects asks and receives input from the player
+// whether the guess was correct
 func (obj *Doggynator) askIfGuessIsCorrect(scanner *bufio.Scanner) bool {
 	response := obj.askForYesOrNo(scanner)
 	switch response {
@@ -235,6 +303,8 @@ func (obj *Doggynator) askIfGuessIsCorrect(scanner *bufio.Scanner) bool {
 	}
 }
 
+// askForYesOrNo acquires only a Yes or No answer from the player
+// and in enters a loop until it receives one
 func (obj *Doggynator) askForYesOrNo(scanner *bufio.Scanner) Response {
 	for true {
 		rawAnswer := receiveInput(scanner)
@@ -252,12 +322,16 @@ func (obj *Doggynator) boast(scanner *bufio.Scanner) {
 	obj.writeln("Heh, I'm so smart")
 }
 
+// processCorrectGuess modifies the data of a correctly guessed
+// Record with the answers it has received
 func (obj *Doggynator) processCorrectGuess(guess *Record, scanner *bufio.Scanner) {
 	obj.printExplanation(guess)
 	obj.lm.learn(guess)
 	//obj.boast(scanner)
 }
 
+// printExplanation prints whatever the ExplanationMechanism
+// has concluded
 func (obj *Doggynator) printExplanation(guess *Record) {
 	explanation, surprised := obj.em.explain(guess)
 	if len(*explanation) > 0 {
@@ -274,6 +348,8 @@ func (obj *Doggynator) printExplanation(guess *Record) {
 
 // Menu //
 
+// Start shows the menu up on the console and
+// waits for input from the player
 func (obj *Doggynator) Start() {
 	obj.writeln("Hello to Doggynator!")
 	for true {
@@ -304,6 +380,8 @@ func (obj *Doggynator) Start() {
 // Helper Methods //
 
 // TODO: Could be faster?
+
+// filter filters the empty lines
 func filter(input []string) (output []string) {
 	for _, elem := range input {
 		if elem != "" {
@@ -313,7 +391,8 @@ func filter(input []string) (output []string) {
 	return output
 }
 
-func (obj *Doggynator) QuestionsToString() *string {
+// questionToString puts all available questions in a single String
+func (obj *Doggynator) questionsToString() *string {
 	stringified := ""
 	for _, elem := range obj.questions {
 		stringified += elem + "\n"
@@ -321,24 +400,30 @@ func (obj *Doggynator) QuestionsToString() *string {
 	return &stringified
 }
 
+// write writes to the dedicated output object
 func (obj *Doggynator) write(message string) {
 	obj.output.WriteString(message)
 	obj.output.Flush()
 }
 
+// write + '\n'
 func (obj *Doggynator) writeln(message string) {
 	obj.write(message + "\n")
 }
 
+// writeErr writes an error into the dedicated
+// output object
 func (obj *Doggynator) writeErr(err error) {
 	obj.writeln(err.Error())
 }
 
+// receiveInput receives input from the dedicated input object
 func receiveInput(scanner *bufio.Scanner) string {
 	scanner.Scan()
 	return scanner.Text()
 }
 
+// RandomGenerator is used for mocking the RNG in the Unit tests
 type RandomGenerator interface {
 	Intn(limit int) int
 }
