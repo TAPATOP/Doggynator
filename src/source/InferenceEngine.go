@@ -9,7 +9,7 @@ const MinimumAnsweredQuestions = 3
 const MinimumIntervalBetweenAnswers = 3
 const MaximumIntervalBetweenAnswers = 5
 const MentionReductionFactor = 3
-const RandomQuestionProbability = 50
+const ProbabilityOfRandomQuestion = 50
 
 type InferenceEngine struct {
 	records                  []Record
@@ -119,7 +119,7 @@ func (obj *InferenceEngine) askQuestion() (index int) {
 
 func (obj *InferenceEngine) chooseQuestionIndex() int {
 	randomNum := obj.randomGenerator.Intn(100)
-	if randomNum > RandomQuestionProbability {
+	if randomNum < ProbabilityOfRandomQuestion {
 		index := obj.randomGenerator.Intn(len(obj.questions))
 		for obj.dbf.isAsked(index) {
 			index = obj.randomGenerator.Intn(len(obj.questions))

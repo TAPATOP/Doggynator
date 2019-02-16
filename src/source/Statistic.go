@@ -105,13 +105,20 @@ func (obj *Statistic) mostProbableAnswer() Response {
 }
 
 func (obj *Statistic) entropy() float64 {
-	positiveProbability := (float64)(obj.getPositive()) / (float64)(obj.getTotalCountOf())
-	negativeProbability := (float64)(obj.getNegative()) / (float64)(obj.getTotalCountOf())
-	unknownProbability := (float64)(obj.getUnknown()) / (float64)(obj.getTotalCountOf())
+	positiveProbability := normalize((float64)(obj.getPositive()) / (float64)(obj.getTotalCountOf()))
+	negativeProbability := normalize((float64)(obj.getNegative()) / (float64)(obj.getTotalCountOf()))
+	unknownProbability := normalize((float64)(obj.getUnknown()) / (float64)(obj.getTotalCountOf()))
 
 	return -positiveProbability*math.Log2(positiveProbability) -
 		negativeProbability*math.Log2(negativeProbability) -
 		unknownProbability*math.Log2(unknownProbability)
+}
+
+func normalize(probability float64) float64 {
+	if probability < MinimumProbability {
+		return MinimumProbability
+	}
+	return probability
 }
 
 //TODO::

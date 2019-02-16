@@ -351,7 +351,7 @@ func (obj *ExpertSystem) printExplanation(guess *Record) {
 // Start shows the menu up on the console and
 // waits for input from the player
 func (obj *ExpertSystem) Start() {
-	obj.writeln("Hello to ExpertSystem!")
+	obj.writeln("Hello to the garage- made Akinator- like thing!")
 	for true {
 		obj.writeln("Please press the following numbers to execute the commands")
 		obj.writeln("1: Play")
