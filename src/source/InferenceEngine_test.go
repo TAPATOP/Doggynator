@@ -51,7 +51,7 @@ func TestProcessResponse(t *testing.T) {
 	}
 }
 
-func ExampleDoggynator_TestProcessResponse() {
+func ExampleExpertSystem_processResponse() {
 
 	records := []Record{
 		*RecordConstructor(
