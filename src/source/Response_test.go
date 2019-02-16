@@ -34,6 +34,14 @@ func TestStringToResponse(t *testing.T) {
 			input:    "yup",
 			expected: Response(Yes),
 		},
+		{
+			input:    "probably",
+			expected: Response(ProbablyYes),
+		},
+		{
+			input:    "probably not",
+			expected: Response(ProbablyNo),
+		},
 	}
 
 	for index, test := range tests {
