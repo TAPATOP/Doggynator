@@ -1,5 +1,5 @@
 # Doggynator
-Akinator- style project
+Akinator- style project, but for dogs.
 
 The goal of this project is to implement an Expert System that builds up a Knowledgebase through dialogue with the player. The original idea was for it to work for dog breeds or animals, but it can technically work for any sort of data, as long as you structure it in the form of questions that you would answer with "yes", "no" and "I don't know/ irrelevant"
 
